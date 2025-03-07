@@ -309,6 +309,7 @@ func TestNewConfigServerWithCorrectParameters(t *testing.T) {
 	viper.Set("SERVER_ADDR", "localhost")
 	viper.Set("SERVER_PORT", 8080)
 	viper.Set("SERVER_TIMEOUT", 10)
+	viper.Set("SERVER_MAX_REQUEST_SIZE", 1)
 	viper.Set("SERVER_BASICAUTH_USERNAME", "")
 	viper.Set("SERVER_BASICAUTH_PASSWORD", "")
 
@@ -318,6 +319,7 @@ func TestNewConfigServerWithCorrectParameters(t *testing.T) {
 	assert.Equal(t, c.Addr, "localhost")
 	assert.Equal(t, c.Port, 8080)
 	assert.Equal(t, c.Timeout, 10)
+	assert.Equal(t, c.MaxRequestSize, 1)
 	assert.Equal(t, c.BasicAuthUsername, "")
 	assert.Equal(t, c.BasicAuthPassword, "")
 }

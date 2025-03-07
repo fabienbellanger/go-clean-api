@@ -37,6 +37,12 @@ func (s *ChiServer) initMiddlewares(r *chi.Mux) {
 	if s.Config.Log.EnableAccessLog {
 		r.Use(s.initAccessLogger())
 	}
+
+	// Request size limiter
+	if s.Config.Server.MaxRequestSize > 0 {
+		r.Use(middleware.RequestSize(s.Config.Server.MaxRequestSize << 10))
+	}
+
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(time.Duration(s.Config.Server.Timeout) * time.Second))
 	r.Use(middleware.RealIP)

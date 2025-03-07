@@ -31,6 +31,7 @@ func GetAPIv1Doc(w http.ResponseWriter, r *http.Request) error {
 }
 
 // BigTasks returns a big JSON
+// TODO: Remove?
 func BigTasks(w http.ResponseWriter, r *http.Request) error {
 	type Task struct {
 		ID   int

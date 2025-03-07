@@ -19,6 +19,9 @@ type ConfigServer struct {
 	// Timeout
 	Timeout int
 
+	// Max request size in KB (0 = unlimited)
+	MaxRequestSize int64
+
 	// Basic Auth username
 	BasicAuthUsername string
 
@@ -43,6 +46,7 @@ func NewConfigServer() (*ConfigServer, error) {
 		Addr:              addr,
 		Port:              port,
 		Timeout:           viper.GetInt("SERVER_TIMEOUT"),
+		MaxRequestSize:    viper.GetInt64("SERVER_MAX_REQUEST_SIZE"),
 		BasicAuthUsername: viper.GetString("SERVER_BASICAUTH_USERNAME"),
 		BasicAuthPassword: viper.GetString("SERVER_BASICAUTH_PASSWORD"),
 	}, nil
