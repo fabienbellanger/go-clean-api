@@ -1,0 +1,75 @@
+openapi: '3.0.2'
+info:
+  title: Go Clean API
+  version: '1.0'
+  description: REST API for Go using Clean Architecture
+  contact:
+    name: Fabien Bellanger
+    email: valentil@gmail.com
+  license:
+    name: MIT
+    url: https://github.com/fabienbellanger/go-clean-api/blob/main/LICENSE
+servers:
+  - url: http://localhost:{port}/api/v1
+    description: Local server
+    variables:
+      port:
+        enum:
+          - "3003"
+        default: "3003"
+  - url: https://<base URL>/api/v1
+    description: Production server
+paths:
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    Unauthorized:
+      description: Access token is missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResponseError'
+    BadRequest:
+      description: Invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResponseError'
+        text/plain:
+          schema:
+            type: string
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResponseError'
+    MethodNotAllowed:
+      description: Method Not Allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResponseError'
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResponseError'
+  schemas:
+    ResponseError:
+      type: object
+      properties:
+        code:
+          type: integer
+          minimum: 100
+          maximum: 527
+        message:
+          type: string
+      required:
+        - code
+        - message

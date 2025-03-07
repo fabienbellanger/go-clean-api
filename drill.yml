@@ -1,0 +1,9 @@
+concurrency: 256
+base: 'http://localhost:3003'
+iterations: 10000
+rampup: 0
+
+plan:
+  - name: Health Check
+    request:
+      url: /health

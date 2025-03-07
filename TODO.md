@@ -1,0 +1,23 @@
+# TODO list
+
+- [ ] Rework requests and responses
+- [ ] Add user restore route
+- [ ] Add CI with Github action
+- [ ] Add / Test `Http Rate Limiting Middleware` middleware
+- [ ] Add refresh token
+- [ ] Add forgotten password
+- [ ] Add roles and scopes
+- [ ] Add Docker support
+  - [ ] Try OpenTelemetry [middleware](https://github.com/gofiber/contrib/tree/main/otelfiber)
+  - [ ] Mettre en place la stack Prometheus + Grafana pour la télémétrie
+  - [ ] Add Prometheus metrics ([Example](https://github.com/stefanprodan/dockprom))
+  - [ ] Create a first user to use API
+- [ ] Try test suite [ginkgo](https://github.com/onsi/ginkgo) and [gomega](https://github.com/onsi/gomega)
+- [x] Replace SHA2 by argon2/bcrypt for password hashing
+- [x] Add `Timeout` middleware
+- [x] Add `RealIP` middleware
+- [x] Add `CORS` middleware
+- [x] Add OpenAPI doc with BasicAuth support
+- [x] Add JWT / Auth middleware
+- [x] Change / improve logger middleware
+- [x] Add unit tests for infrastructure
