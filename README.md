@@ -1,5 +1,6 @@
 # Go REST API using Clean Architecture
 
+[![Build status](https://github.com/fabienbellanger/go-clean-api/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/fabienbellanger/go-clean-api/actions/workflows/CI.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/fabienbellanger/go-clean-api)](https://goreportcard.com/report/github.com/fabienbellanger/go-clean-api)
 [![MIT license](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
 [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=square)](https://pkg.go.dev/github.com/fabienbellanger/go-clean-api)
@@ -15,7 +16,6 @@
   - [pprof](#pprof)
   - [trace](#trace)
   - [cover](#cover)
-- [TODO](#todo)
 
 ## Commands list
 
