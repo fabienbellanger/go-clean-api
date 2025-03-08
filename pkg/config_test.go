@@ -319,7 +319,7 @@ func TestNewConfigServerWithCorrectParameters(t *testing.T) {
 	assert.Equal(t, c.Addr, "localhost")
 	assert.Equal(t, c.Port, 8080)
 	assert.Equal(t, c.Timeout, 10)
-	assert.Equal(t, c.MaxRequestSize, 1)
+	assert.Equal(t, c.MaxRequestSize, int64(1))
 	assert.Equal(t, c.BasicAuthUsername, "")
 	assert.Equal(t, c.BasicAuthPassword, "")
 }
