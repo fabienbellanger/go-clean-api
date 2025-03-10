@@ -103,7 +103,7 @@ migrate create -ext sql -dir migrations <migration_name>
 ### Run migrations
 ```bash
 migrate -source file://migrations -database <connection_string> up
-migrate -source file://./migrations -database "mysql://root:root@tcp(localhost:3306)/go-clean-api" up
+migrate -source file://./migrations -database "mysql://root:root@tcp(localhost:3306)/go_clean_api" up
 ```
 
 ### Revert migrations
