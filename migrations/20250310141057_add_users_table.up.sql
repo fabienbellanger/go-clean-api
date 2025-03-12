@@ -12,5 +12,6 @@ CREATE TABLE IF NOT EXISTS `users`
     UNIQUE KEY `email` (`email`),
     KEY `idx_users_deleted_at` (`deleted_at`)
 ) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  DEFAULT COLLATE = utf8mb4_unicode_ci;
+  DEFAULT 
+    CHARSET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci;
