@@ -20,6 +20,31 @@ servers:
   - url: https://<base URL>/api/v1
     description: Production server
 paths:
+  /token:
+    post:
+      description: Authenticate a user
+      tags:
+        - "User"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetAccessTokenRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAccessTokenResponse'
+        '400':
+            $ref: "#/components/responses/BadRequest"
+        '401':
+            $ref: "#/components/responses/Unauthorized"
+        '500':
+            $ref: "#/components/responses/InternalServerError"
+  
 components:
   securitySchemes:
     bearerAuth:
@@ -73,3 +98,31 @@ components:
       required:
         - code
         - message
+    GetAccessTokenRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+      example:
+        email: user@example.com
+        password: "00000000"
+      required:
+        - email
+        - password
+    GetAccessTokenResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+          description: Access token
+        access_token_expired_at:
+          type: string
+          format: date-time
+          description: Access token expiration date time
+      required:
+        - access_token
+        - access_token_expired_at

@@ -52,8 +52,8 @@ func (u *Handler) token(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	res := GetAccessTokenResponse{
-		AccessToken: resUC.Token.Token,
-		ExpireAt:    resUC.Token.ExpiredAt,
+		AccessToken:          resUC.Token.Token,
+		AccessTokenExpiredAt: resUC.Token.ExpiredAt,
 	}
 
 	return utils.JSON(w, res)

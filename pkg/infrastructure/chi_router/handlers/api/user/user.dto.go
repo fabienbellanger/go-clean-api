@@ -7,8 +7,8 @@ import (
 )
 
 type GetAccessTokenRequest struct {
-	Email string `json:"email" xml:"email" form:"email"`
-	Passw string `json:"password" xml:"password" form:"password"`
+	Email    string `json:"email" xml:"email" form:"email"`
+	Password string `json:"password" xml:"password" form:"password"`
 }
 
 func (r GetAccessTokenRequest) ToUseCase() (usecases.GetAccessTokenRequest, error) {
@@ -17,7 +17,7 @@ func (r GetAccessTokenRequest) ToUseCase() (usecases.GetAccessTokenRequest, erro
 		return usecases.GetAccessTokenRequest{}, err
 	}
 
-	password, err := vo.NewPassword(r.Passw)
+	password, err := vo.NewPassword(r.Password)
 	if err != nil {
 		return usecases.GetAccessTokenRequest{}, err
 	}
@@ -29,6 +29,6 @@ func (r GetAccessTokenRequest) ToUseCase() (usecases.GetAccessTokenRequest, erro
 }
 
 type GetAccessTokenResponse struct {
-	AccessToken string    `json:"access_token" xml:"access_token"`
-	ExpireAt    time.Time `json:"expires_at" xml:"expires_at"`
+	AccessToken          string    `json:"access_token" xml:"access_token"`
+	AccessTokenExpiredAt time.Time `json:"access_token_expired_at" xml:"access_token_expired_at"`
 }
