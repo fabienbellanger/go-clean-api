@@ -4,6 +4,7 @@ import (
 	"errors"
 	"go-clean-api/pkg/domain/entities"
 	vo "go-clean-api/pkg/domain/value_objects"
+	"time"
 )
 
 var (
@@ -20,7 +21,12 @@ var (
 // User is the interface that wraps the basic methods to interact with the user repository.
 type User interface {
 	GetByEmail(GetByEmailRequest) (GetByEmailResponse, error)
+	Create(CreateUserRequest) (CreateUserResponse, error)
 }
+
+//
+// ======== GetByEmail ========
+//
 
 // GetByEmailRequest is the data transfer object for the GetByEmail method request.
 type GetByEmailRequest struct {
@@ -31,4 +37,22 @@ type GetByEmailRequest struct {
 type GetByEmailResponse struct {
 	ID       entities.UserID
 	Password vo.Password
+}
+
+//
+// ======== Create ========
+//
+
+type CreateUserRequest struct {
+	ID        entities.UserID
+	Email     vo.Email
+	Password  vo.Password
+	Lastname  string
+	Firstname string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+type CreateUserResponse struct {
+	entities.User
 }

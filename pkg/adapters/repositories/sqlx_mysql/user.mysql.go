@@ -40,3 +40,9 @@ func (u *User) GetByEmail(req repositories.GetByEmailRequest) (repositories.GetB
 
 	return response, nil
 }
+
+func (u *User) Create(req repositories.CreateUserRequest) (repositories.CreateUserResponse, error) {
+	// TODO: implement
+
+	return repositories.CreateUserResponse{}, nil
+}
