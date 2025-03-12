@@ -17,13 +17,13 @@ func TestNewEmail(t *testing.T) {
 
 	var e1 utils.ValidatorErrors
 	e1 = append(e1, utils.ValidatorError{
-		FailedField: "Value",
+		FailedField: "Email",
 		Tag:         "email",
 		Value:       "",
 	})
 	var e2 utils.ValidatorErrors
 	e2 = append(e2, utils.ValidatorError{
-		FailedField: "Value",
+		FailedField: "Email",
 		Tag:         "required",
 		Value:       "",
 	})
