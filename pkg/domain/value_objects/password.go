@@ -8,17 +8,17 @@ import (
 
 // Password represents an password value object
 type Password struct {
-	Password string `validate:"required,min=8"`
+	Value string
 }
 
 // String returns the password value
 func (p *Password) String() string {
-	return p.Password
+	return p.Value
 }
 
 // NewPassword creates a new password
 func NewPassword(value string) (Password, error) {
-	p := Password{Password: value}
+	p := Password{Value: value}
 
 	err := p.Validate()
 	if err != nil {
@@ -30,16 +30,16 @@ func NewPassword(value string) (Password, error) {
 
 // Validate checks if a struct is valid and returns an array of errors
 func (p *Password) Validate() utils.ValidatorErrors {
-	return utils.ValidateStruct(p)
+	return utils.ValidateVar(p.Value, "password", "required,min=8")
 }
 
 // HashUserPassword hashes a password
 func (p *Password) HashUserPassword() (string, error) {
-	passwordBytes, err := bcrypt.GenerateFromPassword([]byte(p.Password), bcrypt.DefaultCost)
+	passwordBytes, err := bcrypt.GenerateFromPassword([]byte(p.Value), bcrypt.DefaultCost)
 	return string(passwordBytes), err
 }
 
 // Verify checks if the password is correct
 func (p *Password) Verify(hashedPassword string) error {
-	return bcrypt.CompareHashAndPassword([]byte(p.Password), []byte(hashedPassword))
+	return bcrypt.CompareHashAndPassword([]byte(p.Value), []byte(hashedPassword))
 }

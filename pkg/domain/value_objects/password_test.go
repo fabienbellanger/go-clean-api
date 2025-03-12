@@ -17,13 +17,13 @@ func TestNewPassword(t *testing.T) {
 
 	var e1 utils.ValidatorErrors
 	e1 = append(e1, utils.ValidatorError{
-		FailedField: "Password",
+		FailedField: "password",
 		Tag:         "min",
 		Value:       "8",
 	})
 	var e2 utils.ValidatorErrors
 	e2 = append(e2, utils.ValidatorError{
-		FailedField: "Password",
+		FailedField: "password",
 		Tag:         "required",
 		Value:       "",
 	})
@@ -35,7 +35,7 @@ func TestNewPassword(t *testing.T) {
 		{
 			value: "password",
 			wanted: result{
-				password: Password{Password: "password"},
+				password: Password{Value: "password"},
 				err:      nil,
 			},
 		},

@@ -17,13 +17,13 @@ func TestNewEmail(t *testing.T) {
 
 	var e1 utils.ValidatorErrors
 	e1 = append(e1, utils.ValidatorError{
-		FailedField: "Email",
+		FailedField: "email",
 		Tag:         "email",
 		Value:       "",
 	})
 	var e2 utils.ValidatorErrors
 	e2 = append(e2, utils.ValidatorError{
-		FailedField: "Email",
+		FailedField: "email",
 		Tag:         "required",
 		Value:       "",
 	})
@@ -35,7 +35,7 @@ func TestNewEmail(t *testing.T) {
 		{
 			value: "toto@gmail.com",
 			wanted: result{
-				email: Email{Email: "toto@gmail.com"},
+				email: Email{Value: "toto@gmail.com"},
 				err:   nil,
 			},
 		},
