@@ -17,15 +17,15 @@ func TestNewEmail(t *testing.T) {
 
 	var e1 utils.ValidatorErrors
 	e1 = append(e1, utils.ValidatorError{
-		FailedField: "email",
-		Tag:         "email",
-		Value:       "",
+		Field: "email",
+		Tag:   "email",
+		Value: "",
 	})
 	var e2 utils.ValidatorErrors
 	e2 = append(e2, utils.ValidatorError{
-		FailedField: "email",
-		Tag:         "required",
-		Value:       "",
+		Field: "email",
+		Tag:   "required",
+		Value: "",
 	})
 
 	tests := []struct {

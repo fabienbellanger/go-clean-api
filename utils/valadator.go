@@ -8,9 +8,9 @@ import (
 
 // ValidatorError represents error validation struct.
 type ValidatorError struct {
-	FailedField string `json:"failed_field" xml:"failed_field"`
-	Tag         string `json:"tag" xml:"tag"`
-	Value       string `json:"value" xml:"value"`
+	Field string `json:"field" xml:"field"`
+	Tag   string `json:"tag" xml:"tag"`
+	Value string `json:"value" xml:"value"`
 }
 
 // ValidatorErrors is a slice of ValidatorError.
@@ -32,9 +32,9 @@ func ValidateStruct(s any) (errors ValidatorErrors) {
 	if errs != nil {
 		for _, err := range errs.(validator.ValidationErrors) {
 			errors = append(errors, ValidatorError{
-				FailedField: err.Field(),
-				Tag:         err.Tag(),
-				Value:       err.Param(),
+				Field: err.Field(),
+				Tag:   err.Tag(),
+				Value: err.Param(),
 			})
 		}
 	}
@@ -49,9 +49,9 @@ func ValidateVar(v any, field, tag string) (errors ValidatorErrors) {
 	if errs != nil {
 		for _, err := range errs.(validator.ValidationErrors) {
 			errors = append(errors, ValidatorError{
-				FailedField: field,
-				Tag:         err.Tag(),
-				Value:       err.Param(),
+				Field: field,
+				Tag:   err.Tag(),
+				Value: err.Param(),
 			})
 		}
 	}

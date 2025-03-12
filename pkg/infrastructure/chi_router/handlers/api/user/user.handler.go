@@ -39,12 +39,12 @@ func (h *Handler) PrivateRoutes() {
 func (u *Handler) token(w http.ResponseWriter, r *http.Request) error {
 	var body GetAccessTokenRequest
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		return utils.Err400(w, err, "Error decoding body", nil)
+		return utils.Err400(w, err, "Error when decoding the body", nil)
 	}
 
 	req, err := body.ToUseCase()
 	if err != nil {
-		return utils.Err400(w, err, err.Error(), nil)
+		return utils.Err400(w, err, "Invalid parameters", err)
 	}
 	resUC, errUC := u.userUseCase.GetAccessToken(req)
 	if errUC != nil {
