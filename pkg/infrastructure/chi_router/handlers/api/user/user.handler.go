@@ -11,6 +11,10 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+//
+// ======== GetAccessToken ========
+//
+
 // Handler handles user requests
 type Handler struct {
 	router      chi.Router

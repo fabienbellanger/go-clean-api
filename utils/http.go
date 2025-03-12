@@ -77,7 +77,7 @@ func (e *HTTPError) Error() string {
 func (e *HTTPError) SendError(w http.ResponseWriter) error {
 	res, err := json.Marshal(e)
 	if err != nil {
-		return Err500(w, err, "error when encoding the response", nil)
+		return Err500(w, err, "error when JSON encoding the response", nil)
 	}
 
 	w.Header().Add("Content-Type", "application/json")
@@ -119,7 +119,7 @@ func Err500(w http.ResponseWriter, err error, msg string, details any) error {
 func JSON(w http.ResponseWriter, data any) error {
 	res, err := json.Marshal(data)
 	if err != nil {
-		return Err500(w, err, "error when encoding the response", nil)
+		return Err500(w, err, "error when JSON encoding the response", nil)
 	}
 
 	w.Header().Add("Content-Type", "application/json")
