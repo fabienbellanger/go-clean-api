@@ -7,7 +7,7 @@ import (
 	"go-clean-api/pkg/adapters/repositories/sqlx_mysql"
 	"go-clean-api/pkg/domain/usecases"
 	"go-clean-api/pkg/infrastructure/chi_router/handlers"
-	"go-clean-api/pkg/infrastructure/chi_router/handlers/api"
+	"go-clean-api/pkg/infrastructure/chi_router/handlers/api/user"
 	"go-clean-api/pkg/infrastructure/chi_router/handlers/web"
 	"go-clean-api/pkg/infrastructure/logger"
 	"go-clean-api/utils"
@@ -98,15 +98,15 @@ func (s *ChiServer) routes(r *chi.Mux) {
 		// Version 1
 		a.Route("/v1", func(v1 chi.Router) {
 			// User use case
-			userRepo := sqlx_mysql.NewUserMysqlRepository(s.DB)
+			userRepo := sqlx_mysql.NewUser(s.DB)
 			userUseCase := usecases.NewUser(userRepo, s.Config.JWT)
 
 			// Public routes
 			v1.Group(func(v1 chi.Router) {
 				// User routes
 				v1.Route("/", func(u chi.Router) {
-					h := api.NewUser(u, s.Logger, userUseCase)
-					h.UserPublicRoutes()
+					h := user.NewHandler(u, s.Logger, userUseCase)
+					h.PublicRoutes()
 				})
 			})
 		})

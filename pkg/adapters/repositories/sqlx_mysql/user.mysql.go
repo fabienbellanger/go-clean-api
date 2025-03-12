@@ -8,18 +8,18 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-// UserMysql is an implementation of the UserRepository interface
-type UserMysql struct {
+// User is an implementation of the UserRepository interface
+type User struct {
 	db *sqlx.DB
 }
 
-// NewUserMysqlRepository creates a new UserMysqlRepository
-func NewUserMysqlRepository(db *db.MySQL) *UserMysql {
-	return &UserMysql{db: db.DB}
+// NewUser creates a new UserMysqlRepository
+func NewUser(db *db.MySQL) *User {
+	return &User{db: db.DB}
 }
 
 // GetByEmail returns user ID and password from the email
-func (u *UserMysql) GetByEmail(req repositories.GetByEmailRequest) (repositories.GetByEmailResponse, error) {
+func (u *User) GetByEmail(req repositories.GetByEmailRequest) (repositories.GetByEmailResponse, error) {
 	var model models.GetByEmail
 	row := u.db.QueryRowx(`
 		SELECT id, password

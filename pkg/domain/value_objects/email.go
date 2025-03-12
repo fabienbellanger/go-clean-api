@@ -1,20 +1,22 @@
 package values_objects
 
-import "go-clean-api/utils"
+import (
+	"go-clean-api/utils"
+)
 
 // Email represents an email value object
 type Email struct {
-	Value string `validate:"required,email"`
+	Email string `validate:"required,email"`
 }
 
 // String returns the email value
 func (e *Email) String() string {
-	return e.Value
+	return e.Email
 }
 
 // NewEmail creates a new email
 func NewEmail(value string) (Email, error) {
-	e := Email{Value: value}
+	e := Email{Email: value}
 
 	err := e.Validate()
 	if err != nil {

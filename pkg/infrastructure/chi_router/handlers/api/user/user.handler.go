@@ -1,4 +1,4 @@
-package api
+package user
 
 import (
 	"encoding/json"
@@ -11,28 +11,32 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-// User handler
-type User struct {
+// Handler handles user requests
+type Handler struct {
 	router      chi.Router
 	userUseCase usecases.User
 	logger      logger.CustomLogger
 }
 
-// NewUser returns a new Handler
-func NewUser(r chi.Router, l logger.CustomLogger, userUseCase usecases.User) User {
-	return User{
+// NewHandler returns a new Handler
+func NewHandler(r chi.Router, l logger.CustomLogger, userUseCase usecases.User) Handler {
+	return Handler{
 		router:      r,
 		userUseCase: userUseCase,
 		logger:      l,
 	}
 }
 
-// UserPublicRoutes adds users public routes
-func (u *User) UserPublicRoutes() {
-	u.router.Post("/token", handlers.WrapError(u.token, u.logger))
+// PublicRoutes adds users public routes
+func (h *Handler) PublicRoutes() {
+	h.router.Post("/token", handlers.WrapError(h.token, h.logger))
 }
 
-func (u *User) token(w http.ResponseWriter, r *http.Request) error {
+// PrivateRoutes adds users private routes
+func (h *Handler) PrivateRoutes() {
+}
+
+func (u *Handler) token(w http.ResponseWriter, r *http.Request) error {
 	var body GetAccessTokenRequest
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		return utils.Err400(w, err, "Error decoding body", nil)

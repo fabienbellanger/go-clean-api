@@ -1,4 +1,4 @@
-package api
+package user
 
 import (
 	"go-clean-api/pkg/domain/usecases"

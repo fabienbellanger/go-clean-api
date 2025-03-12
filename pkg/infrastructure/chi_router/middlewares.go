@@ -72,7 +72,7 @@ func (s *ChiServer) initAccessLogger() func(next http.Handler) http.Handler {
 			next.ServeHTTP(ww, r)
 
 			stop := time.Since(start)
-			url := r.Host + r.RequestURI // TODO: Do better, missing https:// or http://
+			url := r.Host + r.RequestURI
 			fields := logger.Fields{
 				logger.NewField("code", "int", ww.Status()),
 				logger.NewField("method", "string", r.Method),

@@ -54,7 +54,7 @@ func (uc userUseCase) GetAccessToken(req GetAccessTokenRequest) (GetAccessTokenR
 	}
 
 	// Compare the password
-	if userRepo.Password.Verify(req.Password.Value) != nil {
+	if userRepo.Password.Verify(req.Password.String()) != nil {
 		return GetAccessTokenResponse{}, utils.NewHTTPError(utils.StatusUnauthorized, "Unauthorized", nil, nil)
 	}
 
