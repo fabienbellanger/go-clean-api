@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"runtime"
 	"testing"
 	"time"
 
@@ -312,6 +313,7 @@ func TestNewConfigServerWithCorrectParameters(t *testing.T) {
 	viper.Set("SERVER_MAX_REQUEST_SIZE", 1)
 	viper.Set("SERVER_BASICAUTH_USERNAME", "")
 	viper.Set("SERVER_BASICAUTH_PASSWORD", "")
+	viper.Set("SERVER_MAX_CPU", 0)
 
 	c, err := NewConfigServer()
 
@@ -322,6 +324,7 @@ func TestNewConfigServerWithCorrectParameters(t *testing.T) {
 	assert.Equal(t, c.MaxRequestSize, int64(1))
 	assert.Equal(t, c.BasicAuthUsername, "")
 	assert.Equal(t, c.BasicAuthPassword, "")
+	assert.Equal(t, c.MaxCPU, runtime.NumCPU())
 }
 
 func TestNewConfigServerWithEmptyAddress(t *testing.T) {
@@ -348,4 +351,46 @@ func TestNewConfigServerWithEmptyPort(t *testing.T) {
 
 	assert.NotNil(t, err)
 	assert.Equal(t, err.Error(), "missing server port")
+}
+
+func TestNewConfigServerWithGreaterCPUNumber(t *testing.T) {
+	viper.Set("SERVER_ADDR", "localhost")
+	viper.Set("SERVER_PORT", 8080)
+	viper.Set("SERVER_TIMEOUT", 10)
+	viper.Set("SERVER_MAX_REQUEST_SIZE", 1)
+	viper.Set("SERVER_BASICAUTH_USERNAME", "")
+	viper.Set("SERVER_BASICAUTH_PASSWORD", "")
+	viper.Set("SERVER_MAX_CPU", 1_000)
+
+	c, err := NewConfigServer()
+
+	assert.Nil(t, err)
+	assert.Equal(t, c.Addr, "localhost")
+	assert.Equal(t, c.Port, 8080)
+	assert.Equal(t, c.Timeout, 10)
+	assert.Equal(t, c.MaxRequestSize, int64(1))
+	assert.Equal(t, c.BasicAuthUsername, "")
+	assert.Equal(t, c.BasicAuthPassword, "")
+	assert.Equal(t, c.MaxCPU, runtime.NumCPU())
+}
+
+func TestNewConfigServerWithCorrectCPUNumber(t *testing.T) {
+	viper.Set("SERVER_ADDR", "localhost")
+	viper.Set("SERVER_PORT", 8080)
+	viper.Set("SERVER_TIMEOUT", 10)
+	viper.Set("SERVER_MAX_REQUEST_SIZE", 1)
+	viper.Set("SERVER_BASICAUTH_USERNAME", "")
+	viper.Set("SERVER_BASICAUTH_PASSWORD", "")
+	viper.Set("SERVER_MAX_CPU", 1)
+
+	c, err := NewConfigServer()
+
+	assert.Nil(t, err)
+	assert.Equal(t, c.Addr, "localhost")
+	assert.Equal(t, c.Port, 8080)
+	assert.Equal(t, c.Timeout, 10)
+	assert.Equal(t, c.MaxRequestSize, int64(1))
+	assert.Equal(t, c.BasicAuthUsername, "")
+	assert.Equal(t, c.BasicAuthPassword, "")
+	assert.Equal(t, c.MaxCPU, 1)
 }

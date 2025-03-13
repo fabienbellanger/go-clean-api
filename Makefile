@@ -12,6 +12,7 @@
 	rabbit-client \
 	rabbit-server \
 	build \
+	drill \
 	test \
 	test-verbose \
 	test-beautify \
@@ -106,6 +107,10 @@ rabbit-server:
 
 build: format
 	$(GO_BUILD) -ldflags "-s -w" -o $(BINARY_NAME) -v $(MAIN_PATH)
+
+## drill: Run drill
+drill:
+	drill --benchmark drill.yml --stats --quiet -o 10
 
 ## test: Run test
 test:

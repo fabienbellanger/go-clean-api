@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"fmt"
+	"runtime"
 	"time"
 
 	"github.com/fabienbellanger/goutils"
@@ -27,12 +28,16 @@ type ConfigServer struct {
 
 	// Basic Auth password
 	BasicAuthPassword string
+
+	// Maximal number of CPUs (Mst be lower than the number of CPUs of the machine)
+	MaxCPU int
 }
 
 // NewConfigServer creates a new ConfigServer instance
 func NewConfigServer() (*ConfigServer, error) {
 	addr := viper.GetString("SERVER_ADDR")
 	port := viper.GetInt("SERVER_PORT")
+	maxCPU := viper.GetInt("SERVER_MAX_CPU")
 
 	if addr == "" {
 		return nil, fmt.Errorf("missing server address")
@@ -42,6 +47,11 @@ func NewConfigServer() (*ConfigServer, error) {
 		return nil, fmt.Errorf("missing server port")
 	}
 
+	defaultCPU := runtime.NumCPU()
+	if maxCPU > defaultCPU || maxCPU < 1 {
+		maxCPU = defaultCPU
+	}
+
 	return &ConfigServer{
 		Addr:              addr,
 		Port:              port,
@@ -49,6 +59,7 @@ func NewConfigServer() (*ConfigServer, error) {
 		MaxRequestSize:    viper.GetInt64("SERVER_MAX_REQUEST_SIZE"),
 		BasicAuthUsername: viper.GetString("SERVER_BASICAUTH_USERNAME"),
 		BasicAuthPassword: viper.GetString("SERVER_BASICAUTH_PASSWORD"),
+		MaxCPU:            maxCPU,
 	}, nil
 }
 

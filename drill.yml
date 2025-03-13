@@ -1,9 +1,22 @@
-concurrency: 256
+concurrency: 10
 base: 'http://localhost:3003'
-iterations: 10000
+iterations: 100
 rampup: 0
 
 plan:
   - name: Health Check
     request:
       url: /health
+
+  - name: Big tasks
+    request:
+      url: /big-tasks
+
+  - name: Login
+    assign: login
+    request:
+      url: /api/v1/token
+      method: POST
+      body: '{"email": "john.doe@test.com", "password": "00000000"}'
+      headers:
+        Content-Type: 'application/json'

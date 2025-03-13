@@ -125,7 +125,7 @@ go install github.com/mfridman/tparse@latest
 Run:
 
 ```bash
-go test -cover -json ./... | tparse -all
+go test -cover -json ./... | tparse -trimpath -all
 ```
 
 #### gotestsum

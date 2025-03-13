@@ -4,6 +4,7 @@ import (
 	"go-clean-api/pkg/infrastructure/chi_router"
 	"go-clean-api/pkg/infrastructure/logger"
 	"log"
+	"runtime"
 
 	"github.com/spf13/cobra"
 )
@@ -36,6 +37,10 @@ func startServer() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	// Set the number of CPUs
+	println("MaxCPU", config.Server.MaxCPU)
+	runtime.GOMAXPROCS(config.Server.MaxCPU)
 
 	server := chi_router.NewChiServer(*config, db, l)
 	if err = server.Start(); err != nil {
