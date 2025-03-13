@@ -19,17 +19,17 @@
 
 ## Commands list
 
-| Command                       | Description                 |
-|-------------------------------|-----------------------------|
-| `<binary> run`                | Start server                |
-| `<binary> logs -s`            | Server logs reader          |
-| `<binary> logs -d`            | Database (GORM) logs reader |
-| `<binary> register`           | Create a new user           |
+| Command             | Description                 |
+| ------------------- | --------------------------- |
+| `<binary> run`      | Start server                |
+| `<binary> logs -s`  | Server logs reader          |
+| `<binary> logs -d`  | Database (GORM) logs reader |
+| `<binary> register` | Create a new user           |
 
 ## Makefile commands
 
 | Makefile command    | Go command                                    | Description                                 |
-|---------------------|-----------------------------------------------|---------------------------------------------|
+| ------------------- | --------------------------------------------- | ------------------------------------------- |
 | `make update`       | `go get -u && go mod tidy`                    | Update Go dependencies                      |
 | `make serve`        | `go run cmd/main.go`                          | Start the Web server                        |
 | `make serve-race`   | `go run --race cmd/main.go`                   | Start the Web server with data races option |
@@ -38,21 +38,17 @@
 | `make test-verbose` | `go test -cover -v ./...`                     | Launch unit tests in verbose mode           |
 | `make logs`         | `go run cmd/main.go logs -s`                  | Start server logs reader                    |
 
-
 ## Hot reload
 
 Install [`air`](https://github.com/air-verse/air)
 
 Run:
+
 ```bash
 air
-```
-or:
-```bash
 air | make logs
+make watch
 ```
-
-TODO
 
 ## Golang web server in production
 
@@ -84,7 +80,7 @@ WantedBy=multi-user.target
 ```
 
 | Commande                                   | Description        |
-|--------------------------------------------|--------------------|
+| ------------------------------------------ | ------------------ |
 | `systemctl start <service name>.service`   | To launch          |
 | `systemctl enable <service name>.service`  | To enable on boot  |
 | `systemctl disable <service name>.service` | To disable on boot |
@@ -96,22 +92,57 @@ WantedBy=multi-user.target
 Install [golang-migrate](https://github.com/golang-migrate/migrate)
 
 ### Create a migration
+
 ```bash
 migrate create -ext sql -dir migrations <migration_name>
 ```
 
 ### Run migrations
+
 ```bash
 migrate -source file://migrations -database <connection_string> up
 migrate -source file://./migrations -database "mysql://root:root@tcp(localhost:3306)/go_clean_api" up
 ```
 
 ### Revert migrations
+
 ```bash
 migrate -source file://migrations -database <connection_string> down
 ```
 
-## Benchmark
+## Test and benchmark
+
+### Test
+
+#### tparse
+
+Install [tparse](https://github.com/mfridman/tparse):
+
+```bash
+go install github.com/mfridman/tparse@latest
+```
+
+Run:
+
+```bash
+go test -cover -json ./... | tparse -all
+```
+
+#### gotestsum
+
+Install [gotestsum](https://github.com/gotestyourself/gotestsum):
+
+```bash
+go install gotest.tools/gotestsum@latest
+```
+
+Run:
+
+```bash
+gotestsum --format pkgname --debug
+```
+
+### Benchmark
 
 Use [Drill](https://github.com/fcsonline/drill)
 

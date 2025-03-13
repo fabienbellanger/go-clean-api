@@ -14,6 +14,8 @@
 	build \
 	test \
 	test-verbose \
+	test-beautify \
+	test-tparse \
 	bench \
 	clean \
 	help \
@@ -113,6 +115,14 @@ test:
 test-verbose:
 	$(GO_TEST) -cover -v ./...
 
+## test-beautify: Run tests with gotestsum
+test-beautify:
+	gotestsum --format pkgname --debug
+
+## test-tparse: Run tests with tparse
+test-tparse:
+	go test -cover -json ./... | tparse -trimpath -all
+
 test-cover-count: 
 	$(GO_TEST) -covermode=count -coverprofile=cover-count.out ./...
 
@@ -132,9 +142,13 @@ html-cover-atomic:
 	$(GO_TOOL) cover -html=cover-atomic.out
 
 run-cover-count: test-cover-count cover-count
+	rm cover-count.out
 run-cover-atomic: test-cover-atomic cover-atomic
+	rm cover-atomic.out
 view-cover-count: test-cover-count html-cover-count
+	rm cover-count.out
 view-cover-atomic: test-cover-atomic html-cover-atomic
+	rm cover-atomic.out
 
 ## bench: Run benchmarks
 bench: 
