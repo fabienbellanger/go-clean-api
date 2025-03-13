@@ -9,6 +9,7 @@ info:
   license:
     name: MIT
     url: https://github.com/fabienbellanger/go-clean-api/blob/main/LICENSE
+
 servers:
   - url: http://localhost:{port}/api/v1
     description: Local server
@@ -19,6 +20,7 @@ servers:
         default: "3003"
   - url: https://<base URL>/api/v1
     description: Production server
+
 paths:
   /token:
     post:
@@ -44,6 +46,34 @@ paths:
             $ref: "#/components/responses/Unauthorized"
         '500':
             $ref: "#/components/responses/InternalServerError"
+
+  /users:
+    post:
+      summary: ""
+      description: User creation
+      tags:
+        - "Users"
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreationRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCreationResponse'
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '401':
+          $ref: "#/components/responses/Unauthorized"
+        '500':
+          $ref: "#/components/responses/InternalServerError"
   
 components:
   securitySchemes:
@@ -108,7 +138,7 @@ components:
           type: string
           minLength: 8
       example:
-        email: user@example.com
+        email: john.doe@test.com
         password: "00000000"
       required:
         - email
@@ -126,3 +156,47 @@ components:
       required:
         - access_token
         - access_token_expired_at
+    UserCreationRequest:
+      type: object
+      properties:
+        lastname:
+          type: string
+        firstname:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+      required:
+        - lastname
+        - firstname
+        - username
+        - password
+    UserCreationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        lastname:
+          type: string
+        firstname:
+          type: string
+        email:
+          type: string
+          format: email
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - lastname
+        - firstname
+        - email
+        - created_at
+        - updated_at

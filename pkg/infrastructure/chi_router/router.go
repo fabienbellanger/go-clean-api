@@ -109,6 +109,17 @@ func (s *ChiServer) routes(r *chi.Mux) {
 					h.PublicRoutes()
 				})
 			})
+
+			// Private routes
+			v1.Group(func(v1 chi.Router) {
+				s.initJWT(v1)
+
+				// User routes
+				v1.Route("/users", func(u chi.Router) {
+					h := user.NewHandler(u, s.Logger, userUseCase)
+					h.PrivateRoutes()
+				})
+			})
 		})
 	})
 }

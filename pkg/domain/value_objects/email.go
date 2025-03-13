@@ -6,17 +6,21 @@ import (
 
 // Email represents an email value object
 type Email struct {
-	Value string `validate:"required,email"`
+	value string `validate:"required,email"`
 }
 
-// String returns the email value
 func (e *Email) String() string {
-	return e.Value
+	return e.Value()
+}
+
+// Value returns the email value
+func (e *Email) Value() string {
+	return e.value
 }
 
 // NewEmail creates a new email
 func NewEmail(value string) (Email, error) {
-	e := Email{Value: value}
+	e := Email{value: value}
 
 	err := e.Validate()
 	if err != nil {
@@ -28,5 +32,5 @@ func NewEmail(value string) (Email, error) {
 
 // Validate checks if a struct is valid and returns an array of errors
 func (e *Email) Validate() utils.ValidatorErrors {
-	return utils.ValidateVar(e.Value, "email", "required,email")
+	return utils.ValidateVar(e.value, "email", "required,email")
 }

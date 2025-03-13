@@ -48,7 +48,7 @@ func (uc userUseCase) GetAccessToken(req GetAccessTokenRequest) (GetAccessTokenR
 	if err != nil {
 		var e *utils.HTTPError
 		if errors.Is(err, repositories.ErrUserNotFound) {
-			e = utils.NewHTTPError(utils.StatusUnauthorized, "Unauthorized", nil, nil)
+			e = utils.NewHTTPError(utils.StatusUnauthorized, "Unauthorizedd", nil, err)
 		} else {
 			e = utils.NewHTTPError(utils.StatusInternalServerError, "Internal server error", "error during authentication", err)
 		}
@@ -56,7 +56,7 @@ func (uc userUseCase) GetAccessToken(req GetAccessTokenRequest) (GetAccessTokenR
 	}
 
 	// Compare the password
-	if userRepo.Password.Verify(req.Password.String()) != nil {
+	if userRepo.Password.Verify(req.Password.Value()) != nil {
 		return GetAccessTokenResponse{}, utils.NewHTTPError(utils.StatusUnauthorized, "Unauthorized", nil, nil)
 	}
 
@@ -91,11 +91,11 @@ func (uc userUseCase) Create(req CreateRequest) (CreateResponse, *utils.HTTPErro
 	// Hash password
 	hashedPassword, err := req.Password.HashUserPassword()
 	if err != nil {
-		return CreateResponse{}, utils.NewHTTPError(utils.StatusInternalServerError, "Error when hashing password", err, nil)
+		return CreateResponse{}, utils.NewHTTPError(utils.StatusInternalServerError, "Error when hashing password", nil, err)
 	}
 	password, err := vo.NewPassword(hashedPassword)
 	if err != nil {
-		return CreateResponse{}, utils.NewHTTPError(utils.StatusInternalServerError, "Error when creating password", err, nil)
+		return CreateResponse{}, utils.NewHTTPError(utils.StatusInternalServerError, "Error when creating password", nil, err)
 	}
 
 	// Add user to the database
@@ -112,9 +112,9 @@ func (uc userUseCase) Create(req CreateRequest) (CreateResponse, *utils.HTTPErro
 	if err != nil {
 		var e *utils.HTTPError
 		if errors.Is(err, repositories.ErrDatabase) {
-			e = utils.NewHTTPError(utils.StatusInternalServerError, "Error when creating user", nil, nil)
+			e = utils.NewHTTPError(utils.StatusInternalServerError, "Error when creating user", nil, err)
 		} else {
-			e = utils.NewHTTPError(utils.StatusInternalServerError, "Internal server error", "error during authentication", err)
+			e = utils.NewHTTPError(utils.StatusInternalServerError, "Internal server error", "Error during user creation", err)
 		}
 		return CreateResponse{}, e
 	}

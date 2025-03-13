@@ -1,0 +1,35 @@
+@base_url = http://localhost:3003/api/v1
+
+@access_token = eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDE4NjYxNTcsImlhdCI6MTc0MTg1ODk1NywibmJmIjoxNzQxODU4OTU3LCJzdWIiOiJiMDFkNjUzYS05YjRhLTQ3YWEtOTk3Zi04YWY4YWJlMDY3MzEifQ.Y5HKKM8VadinTtN72DHb702nl6QSJ0P93241uZ3xTBmpxF_Bjx6lck9znXt0tG5FfQnjPxV4WhzmBotqWGZZNw
+
+@email = john.doe@test.com
+@password = 00000000
+
+# ================ User ================
+
+# Get user token
+POST {{base_url}}/token
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+###
+
+# ================ Users ================
+
+# Creation user
+POST {{base_url}}/users
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}",
+  "lastname": "Doe",
+  "firstname": "John"
+}
+
+###

@@ -11,10 +11,6 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-//
-// ======== GetAccessToken ========
-//
-
 // Handler handles user requests
 type Handler struct {
 	router      chi.Router
@@ -38,6 +34,7 @@ func (h *Handler) PublicRoutes() {
 
 // PrivateRoutes adds users private routes
 func (h *Handler) PrivateRoutes() {
+	h.router.Post("/", handlers.WrapError(h.register, h.logger))
 }
 
 func (u *Handler) token(w http.ResponseWriter, r *http.Request) error {
@@ -50,6 +47,7 @@ func (u *Handler) token(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return utils.Err400(w, err, "Invalid parameters", err)
 	}
+
 	resUC, errUC := u.userUseCase.GetAccessToken(req)
 	if errUC != nil {
 		return errUC.SendError(w)
@@ -58,6 +56,34 @@ func (u *Handler) token(w http.ResponseWriter, r *http.Request) error {
 	res := GetAccessTokenResponse{
 		AccessToken:          resUC.Token.Token,
 		AccessTokenExpiredAt: resUC.Token.ExpiredAt,
+	}
+
+	return utils.JSON(w, res)
+}
+
+func (u *Handler) register(w http.ResponseWriter, r *http.Request) error {
+	var body CreateRequest
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		return utils.Err400(w, err, "Error when decoding the body", nil)
+	}
+
+	req, err := body.ToUseCase()
+	if err != nil {
+		return utils.Err400(w, err, "Invalid parameters", err)
+	}
+
+	resUC, errUC := u.userUseCase.Create(req)
+	if errUC != nil {
+		return errUC.SendError(w)
+	}
+
+	res := CreateResponse{
+		ID:        resUC.ID.String(),
+		Email:     resUC.Email.Value(),
+		Lastname:  resUC.Lastname,
+		Firstname: resUC.Firstname,
+		CreatedAt: utils.FormatToRFC3339(resUC.CreatedAt),
+		UpdatedAt: utils.FormatToRFC3339(resUC.UpdatedAt),
 	}
 
 	return utils.JSON(w, res)

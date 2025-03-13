@@ -35,7 +35,7 @@ func TestNewPassword(t *testing.T) {
 		{
 			value: "password",
 			wanted: result{
-				password: Password{Value: "password"},
+				password: Password{value: "password"},
 				err:      nil,
 			},
 		},

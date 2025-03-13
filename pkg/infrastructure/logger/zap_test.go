@@ -35,7 +35,7 @@ func TestZapFromFields(t *testing.T) {
 	fields := Fields{
 		NewField("code", "int", 500),
 		NewField("message", "string", "Internal server error"),
-		NewField("err", "error", errors.New("Internal server error")),
+		NewField("err", "error", errors.New("internal server error")),
 	}
 
 	logger := &ZapLogger{}
@@ -47,5 +47,5 @@ func TestZapFromFields(t *testing.T) {
 	assert.Equal(t, "message", zapFields[1].Key)
 	assert.Equal(t, "Internal server error", zapFields[1].String)
 	assert.Equal(t, "error", zapFields[2].Key)
-	assert.Equal(t, errors.New("Internal server error"), zapFields[2].Interface.(error))
+	assert.Equal(t, errors.New("internal server error"), zapFields[2].Interface.(error))
 }

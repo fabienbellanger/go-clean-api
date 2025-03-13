@@ -1,9 +1,12 @@
 package sqlx_mysql
 
 import (
+	"fmt"
 	"go-clean-api/pkg/adapters/db"
 	"go-clean-api/pkg/adapters/repositories/sqlx_mysql/models"
+	"go-clean-api/pkg/domain/entities"
 	"go-clean-api/pkg/domain/repositories"
+	"go-clean-api/utils"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -27,10 +30,10 @@ func (u *User) GetByEmail(req repositories.GetByEmailRequest) (repositories.GetB
 		WHERE email = ?
 			AND deleted_at IS NULL
 		LIMIT 1`,
-		req.Email,
+		req.Email.Value(),
 	)
 	if err := row.StructScan(&model); err != nil {
-		return repositories.GetByEmailResponse{}, repositories.ErrUserNotFound
+		return repositories.GetByEmailResponse{}, fmt.Errorf("%w: [%v]", repositories.ErrUserNotFound, err)
 	}
 
 	response, err := model.ToRepository()
@@ -42,7 +45,31 @@ func (u *User) GetByEmail(req repositories.GetByEmailRequest) (repositories.GetB
 }
 
 func (u *User) Create(req repositories.CreateUserRequest) (repositories.CreateUserResponse, error) {
-	// TODO: implement
+	_, err := u.db.Exec(`
+		INSERT INTO users (id, email, password, lastname, firstname, created_at, updated_at) 
+		VALUES (?, ?, ?, ?, ?, ?, ?)`,
+		req.ID.Value(),
+		req.Email.Value(),
+		req.Password.Value(),
+		req.Lastname,
+		req.Firstname,
+		utils.FormatToSqlDateTime(req.CreatedAt),
+		utils.FormatToSqlDateTime(req.UpdatedAt),
+	)
 
-	return repositories.CreateUserResponse{}, nil
+	if err != nil {
+		return repositories.CreateUserResponse{}, err
+	}
+
+	return repositories.CreateUserResponse{
+		User: entities.User{
+			ID:        req.ID,
+			Email:     req.Email,
+			Password:  req.Password,
+			Lastname:  req.Lastname,
+			Firstname: req.Firstname,
+			CreatedAt: req.CreatedAt,
+			UpdatedAt: req.UpdatedAt,
+		},
+	}, nil
 }

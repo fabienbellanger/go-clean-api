@@ -35,7 +35,7 @@ func TestNewEmail(t *testing.T) {
 		{
 			value: "toto@gmail.com",
 			wanted: result{
-				email: Email{Value: "toto@gmail.com"},
+				email: Email{value: "toto@gmail.com"},
 				err:   nil,
 			},
 		},

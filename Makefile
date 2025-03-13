@@ -3,7 +3,7 @@
 	update \
 	update-all \
 	format \
-	vet \
+	lint \
 	serve \
 	serve-race \
 	serve-logs \
@@ -13,6 +13,7 @@
 	rabbit-server \
 	build \
 	test \
+	test-verbose \
 	bench \
 	clean \
 	help \
@@ -69,8 +70,8 @@ update-all:
 format:
 	$(GO_FMT) ./...
 
-## vet: Run go vet
-vet: format
+## lint: Run go vet
+lint: format
 	$(GO_VET) ./...
 
 ## serve: Serve API
@@ -106,6 +107,10 @@ build: format
 
 ## test: Run test
 test:
+	$(GO_TEST) -cover ./...
+
+## test-verbose: Run tests
+test-verbose:
 	$(GO_TEST) -cover -v ./...
 
 test-cover-count: 

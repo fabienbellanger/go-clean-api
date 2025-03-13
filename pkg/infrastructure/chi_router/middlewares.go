@@ -22,7 +22,7 @@ var tokenAuth *jwtauth.JWTAuth
 
 func (s *ChiServer) initJWTToken() error {
 	algo := s.Config.JWT.Algorithm
-	key, err := utils.GetKeyFromAlgo(algo, s.Config.JWT.PrivateKeyPath, s.Config.JWT.PublicKeyPath)
+	key, err := utils.GetKeyFromAlgo(algo, s.Config.JWT.SecretKey, s.Config.JWT.PublicKeyPath)
 	if err != nil {
 		return err
 	}
@@ -78,7 +78,7 @@ func (s *ChiServer) initAccessLogger() func(next http.Handler) http.Handler {
 				logger.NewField("method", "string", r.Method),
 				logger.NewField("path", "string", r.URL.Path),
 				logger.NewField("url", "string", url),
-				logger.NewField("ip", "string", r.RemoteAddr), // TODO: Remove port
+				logger.NewField("ip", "string", r.RemoteAddr),
 				logger.NewField("userAgent", "string", r.UserAgent()),
 				logger.NewField("latency", "string", stop.String()),
 				logger.NewField("request_id", "string", requestId),
@@ -108,12 +108,12 @@ func (s *ChiServer) initBasicAuth() func(next http.Handler) http.Handler {
 	return middleware.BasicAuth("Restricted", creds)
 }
 
-func (s *ChiServer) initPprofBasicAuth() func(next http.Handler) http.Handler {
-	creds := make(map[string]string, 1)
-	creds[s.Config.Pprof.BasicAuthUsername] = s.Config.Pprof.BasicAuthPassword
+// func (s *ChiServer) initPprofBasicAuth() func(next http.Handler) http.Handler {
+// 	creds := make(map[string]string, 1)
+// 	creds[s.Config.Pprof.BasicAuthUsername] = s.Config.Pprof.BasicAuthPassword
 
-	return middleware.BasicAuth("Restricted", creds)
-}
+// 	return middleware.BasicAuth("Restricted", creds)
+// }
 
 func (s *ChiServer) initJWT(r chi.Router) {
 	r.Use(jwtauth.Verifier(tokenAuth))
@@ -126,12 +126,12 @@ func (s *ChiServer) jwtAuthenticator(ja *jwtauth.JWTAuth) func(http.Handler) htt
 			token, _, err := jwtauth.FromContext(r.Context())
 
 			if err != nil {
-				utils.Err401(w, err, "Unauthorized", nil) // TODO: Error not managed
+				utils.Err401(w, err, "Unauthorized", nil)
 				return
 			}
 
 			if token == nil || jwt.Validate(token, ja.ValidateOptions()...) != nil {
-				utils.Err401(w, nil, "Unauthorized", nil) // TODO: Error not managed
+				utils.Err401(w, nil, "Unauthorized", nil)
 				return
 			}
 

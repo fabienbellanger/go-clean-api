@@ -21,7 +21,7 @@ func TestNewIDFrom(t *testing.T) {
 		{
 			value: "550e8400-e29b-41d4-a716-446655440000",
 			wanted: result{
-				id:     ID{Value: uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")},
+				id:     ID{value: uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")},
 				is_err: false,
 			},
 		},

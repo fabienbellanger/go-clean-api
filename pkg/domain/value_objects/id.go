@@ -5,17 +5,22 @@ import (
 )
 
 type ID struct {
-	Value uuid.UUID `validate:"required,uuid"`
+	value uuid.UUID `validate:"required,uuid"`
 }
 
 // String returns the ID value
 func (id *ID) String() string {
-	return id.Value.String()
+	return id.value.String()
+}
+
+// Value returns the ID value
+func (id *ID) Value() uuid.UUID {
+	return id.value
 }
 
 // NewID creates a new ID
 func NewID() ID {
-	return ID{Value: uuid.New()}
+	return ID{value: uuid.New()}
 }
 
 // NewIDFrom creates a new ID from string
@@ -24,7 +29,7 @@ func NewIDFrom(value string) (ID, error) {
 	if err != nil {
 		return ID{}, err
 	}
-	id := ID{Value: uid}
+	id := ID{value: uid}
 
 	return id, nil
 }
