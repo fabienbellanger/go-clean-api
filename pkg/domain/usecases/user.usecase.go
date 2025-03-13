@@ -2,6 +2,7 @@ package usecases
 
 import (
 	"errors"
+	"fmt"
 	"go-clean-api/pkg"
 	"go-clean-api/pkg/domain/entities"
 	"go-clean-api/pkg/domain/repositories"
@@ -14,6 +15,7 @@ import (
 type User interface {
 	GetAccessToken(GetAccessTokenRequest) (GetAccessTokenResponse, *utils.HTTPError)
 	Create(CreateRequest) (CreateResponse, *utils.HTTPError)
+	GetByID(GetByIDRequest) (GetByIDResponse, *utils.HTTPError)
 }
 
 type userUseCase struct {
@@ -50,7 +52,11 @@ func (uc userUseCase) GetAccessToken(req GetAccessTokenRequest) (GetAccessTokenR
 		if errors.Is(err, repositories.ErrUserNotFound) {
 			e = utils.NewHTTPError(utils.StatusUnauthorized, "Unauthorizedd", nil, err)
 		} else {
-			e = utils.NewHTTPError(utils.StatusInternalServerError, "Internal server error", "error during authentication", err)
+			e = utils.NewHTTPError(
+				utils.StatusInternalServerError,
+				"Internal server error",
+				"Error during authentication",
+				fmt.Errorf("[user_uc:GetAccessToken] %w: (%v)", repositories.ErrUserNotFound, err))
 		}
 		return GetAccessTokenResponse{}, e
 	}
@@ -99,7 +105,7 @@ func (uc userUseCase) Create(req CreateRequest) (CreateResponse, *utils.HTTPErro
 	}
 
 	// Add user to the database
-	now := time.Now()
+	now := vo.NewTime(time.Now(), nil)
 	respoRes, err := uc.userRepository.Create(repositories.CreateUserRequest{
 		ID:        vo.NewID(),
 		Email:     req.Email,
@@ -111,15 +117,56 @@ func (uc userUseCase) Create(req CreateRequest) (CreateResponse, *utils.HTTPErro
 	})
 	if err != nil {
 		var e *utils.HTTPError
-		if errors.Is(err, repositories.ErrDatabase) {
+		if errors.Is(err, repositories.ErrUserNotFound) {
 			e = utils.NewHTTPError(utils.StatusInternalServerError, "Error when creating user", nil, err)
 		} else {
-			e = utils.NewHTTPError(utils.StatusInternalServerError, "Internal server error", "Error during user creation", err)
+			e = utils.NewHTTPError(
+				utils.StatusInternalServerError,
+				"Internal server error",
+				"Error during user creation",
+				fmt.Errorf("[user_uc:Create] %w: (%v)", repositories.ErrUserNotFound, err))
 		}
 		return CreateResponse{}, e
 	}
 
 	return CreateResponse{
 		User: respoRes.User,
+	}, nil
+}
+
+//
+// ======== Get by ID ========
+//
+
+// GetByIDRequest is the data transfer object for the GetByID method request.
+type GetByIDRequest struct {
+	ID entities.UserID
+}
+
+// GetByIDResponse is the data transfer object for the GetByID method response.
+type GetByIDResponse struct {
+	entities.User
+}
+
+// GetByID returns a user by its ID.
+func (uc userUseCase) GetByID(req GetByIDRequest) (GetByIDResponse, *utils.HTTPError) {
+	// Get user by ID
+	res, err := uc.userRepository.GetByID(repositories.GetByIDRequest{ID: req.ID})
+	if err != nil {
+		var e *utils.HTTPError
+		if errors.Is(err, repositories.ErrUserNotFound) {
+			e = utils.NewHTTPError(utils.StatusNotFound, "No user found", nil, err)
+		} else {
+			e = utils.NewHTTPError(
+				utils.StatusInternalServerError,
+				"Internal server error",
+				"Error when getting user",
+				fmt.Errorf("[user_uc:GetByID] %w: (%v)", repositories.ErrUserNotFound, err))
+		}
+		return GetByIDResponse{}, e
+	}
+
+	return GetByIDResponse{
+		User: res.User,
 	}, nil
 }

@@ -35,6 +35,7 @@ func (h *Handler) PublicRoutes() {
 // PrivateRoutes adds users private routes
 func (h *Handler) PrivateRoutes() {
 	h.router.Post("/", handlers.WrapError(h.register, h.logger))
+	h.router.Get("/{id}", handlers.WrapError(h.getByID, h.logger))
 }
 
 func (u *Handler) token(w http.ResponseWriter, r *http.Request) error {
@@ -55,7 +56,7 @@ func (u *Handler) token(w http.ResponseWriter, r *http.Request) error {
 
 	res := GetAccessTokenResponse{
 		AccessToken:          resUC.Token.Token,
-		AccessTokenExpiredAt: resUC.Token.ExpiredAt,
+		AccessTokenExpiredAt: resUC.Token.ExpiredAt.RFC3339(),
 	}
 
 	return utils.JSON(w, res)
@@ -82,9 +83,30 @@ func (u *Handler) register(w http.ResponseWriter, r *http.Request) error {
 		Email:     resUC.Email.Value(),
 		Lastname:  resUC.Lastname,
 		Firstname: resUC.Firstname,
-		CreatedAt: utils.FormatToRFC3339(resUC.CreatedAt),
-		UpdatedAt: utils.FormatToRFC3339(resUC.UpdatedAt),
+		CreatedAt: resUC.CreatedAt.RFC3339(),
+		UpdatedAt: resUC.UpdatedAt.RFC3339(),
 	}
+
+	return utils.JSON(w, res)
+}
+
+func (u *Handler) getByID(w http.ResponseWriter, r *http.Request) error {
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		return utils.Err400(w, nil, "ID is required", nil)
+	}
+
+	req, err := GetByIDRequest{ID: id}.ToUseCase()
+	if err != nil {
+		return utils.Err400(w, err, "Invalid parameters", err)
+	}
+
+	resUC, errUC := u.userUseCase.GetByID(req)
+	if errUC != nil {
+		return errUC.SendError(w)
+	}
+
+	res := GetByIDResponse{}.FromEntity(resUC)
 
 	return utils.JSON(w, res)
 }

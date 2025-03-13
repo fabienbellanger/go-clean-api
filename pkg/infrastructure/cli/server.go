@@ -38,8 +38,7 @@ func startServer() {
 		log.Fatalln(err)
 	}
 
-	// Set the number of CPUs
-	println("MaxCPU", config.Server.MaxCPU)
+	// Set the max number of CPUs
 	runtime.GOMAXPROCS(config.Server.MaxCPU)
 
 	server := chi_router.NewChiServer(*config, db, l)

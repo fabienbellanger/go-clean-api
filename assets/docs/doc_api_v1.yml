@@ -74,6 +74,38 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         '500':
           $ref: "#/components/responses/InternalServerError"
+
+  /users/{id}:
+    get:
+      summary: ""
+      description: Get user by ID
+      tags:
+        - "Users"
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: User ID
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUserByIdResponse'
+        '400':
+            $ref: "#/components/responses/BadRequest"
+        '401':
+            $ref: "#/components/responses/Unauthorized"
+        '404':
+            $ref: "#/components/responses/NotFound"
+        '500':
+            $ref: "#/components/responses/InternalServerError"
   
 components:
   securitySchemes:
@@ -191,6 +223,35 @@ components:
           type: string
           format: date-time
         updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - lastname
+        - firstname
+        - email
+        - created_at
+        - updated_at
+    GetUserByIdResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        lastname:
+          type: string
+        firstname:
+          type: string
+        email:
+          type: string
+          format: email
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        deleted_at:
           type: string
           format: date-time
       required:

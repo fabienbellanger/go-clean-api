@@ -1,7 +1,8 @@
 @base_url = http://localhost:3003/api/v1
 
-@access_token = eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDE4NjYxNTcsImlhdCI6MTc0MTg1ODk1NywibmJmIjoxNzQxODU4OTU3LCJzdWIiOiJiMDFkNjUzYS05YjRhLTQ3YWEtOTk3Zi04YWY4YWJlMDY3MzEifQ.Y5HKKM8VadinTtN72DHb702nl6QSJ0P93241uZ3xTBmpxF_Bjx6lck9znXt0tG5FfQnjPxV4WhzmBotqWGZZNw
+@access_token = eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDE4ODcxNDMsImlhdCI6MTc0MTg3OTk0MywibmJmIjoxNzQxODc5OTQzLCJzdWIiOiJiMDFkNjUzYS05YjRhLTQ3YWEtOTk3Zi04YWY4YWJlMDY3MzEifQ.swdWXwDoOewBPiyev7FRo0AMv18Otm0pRXextB60GtxgShGD0LXW11JJWRzhBvwQVgpwQDEwH2Ehdp7uWZRD8Q
 
+@user_id = b01d653a-9b4a-47aa-997f-8af8abe06731
 @email = john.doe@test.com
 @password = 00000000
 
@@ -31,5 +32,12 @@ Authorization: Bearer {{access_token}}
   "lastname": "Doe",
   "firstname": "John"
 }
+
+###
+
+# Get user by ID
+GET {{base_url}}/users/{{user_id}}
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 ###

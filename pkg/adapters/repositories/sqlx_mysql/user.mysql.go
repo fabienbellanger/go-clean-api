@@ -6,7 +6,6 @@ import (
 	"go-clean-api/pkg/adapters/repositories/sqlx_mysql/models"
 	"go-clean-api/pkg/domain/entities"
 	"go-clean-api/pkg/domain/repositories"
-	"go-clean-api/utils"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -33,19 +32,19 @@ func (u *User) GetByEmail(req repositories.GetByEmailRequest) (repositories.GetB
 		req.Email.Value(),
 	)
 	if err := row.StructScan(&model); err != nil {
-		return repositories.GetByEmailResponse{}, fmt.Errorf("%w: [%v]", repositories.ErrUserNotFound, err)
+		return repositories.GetByEmailResponse{}, fmt.Errorf("[user_sqlx_mysql:GetByEmail] %w: (%v)", repositories.ErrUserNotFound, err)
 	}
 
-	response, err := model.ToRepository()
+	response, err := model.Repository()
 	if err != nil {
-		return repositories.GetByEmailResponse{}, repositories.ErrConvertFromModel
+		return repositories.GetByEmailResponse{}, fmt.Errorf("[user_sqlx_mysql:GetByEmail] %w: (%v)", repositories.ErrConvertFromModel, err)
 	}
 
 	return response, nil
 }
 
-func (u *User) Create(req repositories.CreateUserRequest) (repositories.CreateUserResponse, error) {
-	_, err := u.db.Exec(`
+func (u *User) Create(req repositories.CreateUserRequest) (res repositories.CreateUserResponse, err error) {
+	_, err = u.db.Exec(`
 		INSERT INTO users (id, email, password, lastname, firstname, created_at, updated_at) 
 		VALUES (?, ?, ?, ?, ?, ?, ?)`,
 		req.ID.Value(),
@@ -53,12 +52,12 @@ func (u *User) Create(req repositories.CreateUserRequest) (repositories.CreateUs
 		req.Password.Value(),
 		req.Lastname,
 		req.Firstname,
-		utils.FormatToSqlDateTime(req.CreatedAt),
-		utils.FormatToSqlDateTime(req.UpdatedAt),
+		req.CreatedAt.SQL(),
+		req.UpdatedAt.SQL(),
 	)
 
 	if err != nil {
-		return repositories.CreateUserResponse{}, err
+		return
 	}
 
 	return repositories.CreateUserResponse{
@@ -72,4 +71,28 @@ func (u *User) Create(req repositories.CreateUserRequest) (repositories.CreateUs
 			UpdatedAt: req.UpdatedAt,
 		},
 	}, nil
+}
+
+func (u *User) GetByID(req repositories.GetByIDRequest) (res repositories.GetByIDResponse, err error) {
+	var model models.User
+	row := u.db.QueryRowx(`
+		SELECT id, email, lastname, firstname, created_at, updated_at, deleted_at
+		FROM users
+		WHERE id = ?
+			AND deleted_at IS NULL
+		LIMIT 1`,
+		req.ID.String(),
+	)
+	if err = row.StructScan(&model); err != nil {
+		return repositories.GetByIDResponse{}, fmt.Errorf("[user_sqlx_mysql:GetByID] %w: (%v)", repositories.ErrUserNotFound, err)
+	}
+
+	user, err := model.Entity()
+	if err != nil {
+		return repositories.GetByIDResponse{}, fmt.Errorf("[user_sqlx_mysql:GetByID] %w: (%v)", repositories.ErrConvertFromModel, err)
+	}
+
+	res.User = user
+
+	return
 }

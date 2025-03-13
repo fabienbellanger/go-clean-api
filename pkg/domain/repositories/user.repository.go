@@ -4,7 +4,6 @@ import (
 	"errors"
 	"go-clean-api/pkg/domain/entities"
 	vo "go-clean-api/pkg/domain/value_objects"
-	"time"
 )
 
 var (
@@ -22,6 +21,7 @@ var (
 type User interface {
 	GetByEmail(GetByEmailRequest) (GetByEmailResponse, error)
 	Create(CreateUserRequest) (CreateUserResponse, error)
+	GetByID(GetByIDRequest) (GetByIDResponse, error)
 }
 
 //
@@ -49,10 +49,24 @@ type CreateUserRequest struct {
 	Password  vo.Password
 	Lastname  string
 	Firstname string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	CreatedAt vo.Time
+	UpdatedAt vo.Time
 }
 
 type CreateUserResponse struct {
+	entities.User
+}
+
+//
+// ======== GetByID ========
+//
+
+// GetByIDRequest is the data transfer object for the GetByID method request.
+type GetByIDRequest struct {
+	ID entities.UserID
+}
+
+// GetByIDResponse is the data transfer object for the GetByID method response.
+type GetByIDResponse struct {
 	entities.User
 }

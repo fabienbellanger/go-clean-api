@@ -2,8 +2,6 @@ package entities
 
 import (
 	vo "go-clean-api/pkg/domain/value_objects"
-
-	"time"
 )
 
 // UserID is a type for user ID
@@ -16,7 +14,7 @@ type User struct {
 	Password  vo.Password
 	Lastname  string
 	Firstname string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt *time.Time
+	CreatedAt vo.Time
+	UpdatedAt vo.Time
+	DeletedAt *vo.Time
 }

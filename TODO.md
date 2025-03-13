@@ -1,5 +1,6 @@
 # TODO list
 
+- [ ] Buffered logs file write
 - [ ] Add middleware to limit body size ([Echo BodyLimit](https://github.com/labstack/echo/blob/master/middleware/body_limit.go))
 - [ ] Add / Test `Http Rate Limiting Middleware` middleware
 - [ ] Add Docker support

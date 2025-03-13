@@ -2,6 +2,7 @@ package entities
 
 import (
 	"go-clean-api/pkg"
+	vo "go-clean-api/pkg/domain/value_objects"
 	"go-clean-api/utils"
 	"time"
 
@@ -11,7 +12,7 @@ import (
 // AccessToken is a struct that represents a JWT access token
 type AccessToken struct {
 	Token     string
-	ExpiredAt time.Time
+	ExpiredAt vo.Time
 }
 
 func NewAccessToken(id UserID, cfg pkg.ConfigJWT) (AccessToken, error) {
@@ -37,5 +38,5 @@ func NewAccessToken(id UserID, cfg pkg.ConfigJWT) (AccessToken, error) {
 	if err != nil {
 		return AccessToken{}, err
 	}
-	return AccessToken{Token: t, ExpiredAt: expiredAt}, nil
+	return AccessToken{Token: t, ExpiredAt: vo.NewTime(expiredAt, nil)}, nil
 }

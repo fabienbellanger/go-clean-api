@@ -88,8 +88,8 @@ func TestGenerateJWT(t *testing.T) {
 				assert.Equal(t, got.jwt.Token, tt.wanted.jwt.Token)
 			} else {
 				assert.Greater(t, len(got.jwt.Token), 0)
-				assert.Greater(t, got.jwt.ExpiredAt, time.Now().Add(lifetime-time.Minute))
-				assert.Less(t, got.jwt.ExpiredAt, time.Now().Add(lifetime+time.Minute))
+				assert.Greater(t, got.jwt.ExpiredAt.Value(), time.Now().Add(lifetime-time.Minute))
+				assert.Less(t, got.jwt.ExpiredAt.Value(), time.Now().Add(lifetime+time.Minute))
 			}
 			assert.Equal(t, got.err, tt.wanted.err)
 		})

@@ -3,7 +3,6 @@ package user
 import (
 	"go-clean-api/pkg/domain/usecases"
 	vo "go-clean-api/pkg/domain/value_objects"
-	"time"
 )
 
 //
@@ -33,8 +32,8 @@ func (r GetAccessTokenRequest) ToUseCase() (usecases.GetAccessTokenRequest, erro
 }
 
 type GetAccessTokenResponse struct {
-	AccessToken          string    `json:"access_token" xml:"access_token"`
-	AccessTokenExpiredAt time.Time `json:"access_token_expired_at" xml:"access_token_expired_at"`
+	AccessToken          string `json:"access_token" xml:"access_token"`
+	AccessTokenExpiredAt string `json:"access_token_expired_at" xml:"access_token_expired_at"`
 }
 
 //
@@ -74,4 +73,51 @@ type CreateResponse struct {
 	Firstname string `json:"firstname" xml:"firstname"`
 	CreatedAt string `json:"created_at" xml:"created_at"`
 	UpdatedAt string `json:"updated_at" xml:"updated_at"`
+}
+
+//
+// ======== Get by ID ========
+//
+
+type GetByIDRequest struct {
+	ID string `json:"id" xml:"id"`
+}
+
+func (r GetByIDRequest) ToUseCase() (usecases.GetByIDRequest, error) {
+	id, err := vo.NewIDFrom(r.ID)
+	if err != nil {
+		return usecases.GetByIDRequest{}, err
+	}
+
+	return usecases.GetByIDRequest{
+		ID: id,
+	}, nil
+}
+
+type GetByIDResponse struct {
+	ID        string `json:"id" xml:"id"`
+	Email     string `json:"email" xml:"email"`
+	Lastname  string `json:"lastname" xml:"lastname"`
+	Firstname string `json:"firstname" xml:"firstname"`
+	CreatedAt string `json:"created_at" xml:"created_at"`
+	UpdatedAt string `json:"updated_at" xml:"updated_at"`
+	DeletedAt string `json:"deleted_at,omitempty" xml:"deleted_at,omitempty"`
+}
+
+// TODO: Add tests
+func (r GetByIDResponse) FromEntity(res usecases.GetByIDResponse) GetByIDResponse {
+	deletedAt := ""
+	if res.DeletedAt != nil {
+		deletedAt = res.DeletedAt.RFC3339()
+	}
+
+	r.ID = res.ID.String()
+	r.Email = res.Email.Value()
+	r.Lastname = res.Lastname
+	r.Firstname = res.Firstname
+	r.CreatedAt = res.CreatedAt.RFC3339()
+	r.UpdatedAt = res.UpdatedAt.RFC3339()
+	r.DeletedAt = deletedAt
+
+	return r
 }
