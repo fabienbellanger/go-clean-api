@@ -22,6 +22,8 @@ type User interface {
 	GetByEmail(GetByEmailRequest) (GetByEmailResponse, error)
 	Create(CreateUserRequest) (CreateUserResponse, error)
 	GetByID(GetByIDRequest) (GetByIDResponse, error)
+	// GetAll(GetAllRequest) (GetAllResponse, error)
+	// CountAll(CountAllRequest) (CountAllResponse, error)
 }
 
 //
@@ -69,4 +71,30 @@ type GetByIDRequest struct {
 // GetByIDResponse is the data transfer object for the GetByID method response.
 type GetByIDResponse struct {
 	entities.User
+}
+
+//
+// ======== GetAll ========
+//
+
+// GetAllRequest is the data transfer object for the GetAll method request.
+type GetAllRequest struct {
+}
+
+// GetAllResponse is the data transfer object for the GetAll method response.
+type GetAllResponse struct {
+	Users []entities.User
+}
+
+//
+// ======== CountAll ========
+//
+
+// CountAllRequest is the data transfer object for the CountAll method request.
+type CountAllRequest struct {
+}
+
+// CountAllResponse is the data transfer object for the CountAll method response.
+type CountAllResponse struct {
+	Total uint
 }

@@ -14,6 +14,7 @@ type GetAccessTokenRequest struct {
 	Password string `json:"password" xml:"password" form:"password"`
 }
 
+// TODO: Add tests
 func (r GetAccessTokenRequest) ToUseCase() (usecases.GetAccessTokenRequest, error) {
 	email, err := vo.NewEmail(r.Email)
 	if err != nil {
@@ -47,6 +48,7 @@ type CreateRequest struct {
 	Firstname string `json:"firstname" xml:"firstname" form:"firstname"`
 }
 
+// TODO: Add tests
 func (r CreateRequest) ToUseCase() (usecases.CreateRequest, error) {
 	email, err := vo.NewEmail(r.Email)
 	if err != nil {

@@ -16,6 +16,7 @@ type User interface {
 	GetAccessToken(GetAccessTokenRequest) (GetAccessTokenResponse, *utils.HTTPError)
 	Create(CreateRequest) (CreateResponse, *utils.HTTPError)
 	GetByID(GetByIDRequest) (GetByIDResponse, *utils.HTTPError)
+	GetAll(GetAllRequest) (GetAllResponse, *utils.HTTPError)
 }
 
 type userUseCase struct {
@@ -169,4 +170,28 @@ func (uc userUseCase) GetByID(req GetByIDRequest) (GetByIDResponse, *utils.HTTPE
 	return GetByIDResponse{
 		User: res.User,
 	}, nil
+}
+
+//
+// ======== GetAll ========
+//
+
+// GetAllRequest is the data transfer object for the GetAll method request.
+type GetAllRequest struct {
+	Page     uint
+	Limit    uint
+	MaxLimit uint
+	Deleted  bool
+}
+
+// GetAllResponse is the data transfer object for the GetAll method response.
+type GetAllResponse struct {
+	Data  []entities.User
+	Total uint
+}
+
+// GetAll returns all users (pagination).
+func (uc userUseCase) GetAll(req GetAllRequest) (GetAllResponse, *utils.HTTPError) {
+	// TODO: Implement
+	return GetAllResponse{}, nil
 }

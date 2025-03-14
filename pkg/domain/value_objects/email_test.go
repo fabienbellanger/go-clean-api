@@ -1,7 +1,6 @@
 package values_objects
 
 import (
-	"log"
 	"testing"
 
 	"go-clean-api/utils"
@@ -58,7 +57,7 @@ func TestNewEmail(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.value, func(t *testing.T) {
 			got, err := NewEmail(tt.value)
-			log.Printf("Error: %v\n", err)
+
 			if err != nil {
 				assert.Equal(t, err, tt.wanted.err)
 			} else {
