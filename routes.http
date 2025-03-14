@@ -1,6 +1,6 @@
 @base_url = http://localhost:3003/api/v1
 
-@access_token = eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDE4ODcxNDMsImlhdCI6MTc0MTg3OTk0MywibmJmIjoxNzQxODc5OTQzLCJzdWIiOiJiMDFkNjUzYS05YjRhLTQ3YWEtOTk3Zi04YWY4YWJlMDY3MzEifQ.swdWXwDoOewBPiyev7FRo0AMv18Otm0pRXextB60GtxgShGD0LXW11JJWRzhBvwQVgpwQDEwH2Ehdp7uWZRD8Q
+@access_token = eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDE5NzIzMzgsImlhdCI6MTc0MTk2NTEzOCwibmJmIjoxNzQxOTY1MTM4LCJzdWIiOiJiMDFkNjUzYS05YjRhLTQ3YWEtOTk3Zi04YWY4YWJlMDY3MzEifQ.BYJSsltvWEKchMh5uNeZrSUgLfkw8WfLCoHfsC9qwMDlr7yMjddyGKV9nCeeGwy-gj4a9KH-WDrmPyhtv_O13g
 
 @user_id = b01d653a-9b4a-47aa-997f-8af8abe06731
 @email = john.doe@test.com
@@ -37,6 +37,22 @@ Authorization: Bearer {{access_token}}
 
 # Get user by ID
 GET {{base_url}}/users/{{user_id}}
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+###
+
+###
+
+# Get all users
+GET {{base_url}}/users?page=1&size=10
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+###
+
+# Get all users deleted
+GET {{base_url}}/users/deleted?page=1&size=10
 Content-Type: application/json
 Authorization: Bearer {{access_token}}
 

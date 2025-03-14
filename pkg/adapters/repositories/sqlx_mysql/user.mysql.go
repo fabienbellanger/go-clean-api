@@ -96,3 +96,63 @@ func (u *User) GetByID(req repositories.GetByIDRequest) (res repositories.GetByI
 
 	return
 }
+
+func (u *User) CountAll(req repositories.CountAllRequest) (repositories.CountAllResponse, error) {
+	q := `
+		SELECT COUNT(id)
+		FROM users`
+
+	if req.Deleted {
+		q += " WHERE deleted_at IS NOT NULL"
+	} else {
+		q += " WHERE deleted_at IS NULL"
+	}
+
+	var count int
+	row := u.db.QueryRowx(q)
+	if err := row.Scan(&count); err != nil {
+		return repositories.CountAllResponse{}, err
+	}
+
+	return repositories.CountAllResponse{Total: count}, nil
+}
+
+func (u *User) GetAll(req repositories.GetAllRequest) (res repositories.GetAllResponse, err error) {
+	q := `
+		SELECT id, email, lastname, firstname, created_at, updated_at, deleted_at
+		FROM users`
+
+	if req.Deleted {
+		q += " WHERE deleted_at IS NOT NULL"
+	} else {
+		q += " WHERE deleted_at IS NULL"
+	}
+
+	q += " LIMIT ? OFFSET ?"
+
+	offset, limit := db.PaginateValues(req.Pagination.Page(), req.Pagination.Size())
+
+	rows, err := u.db.Queryx(q, limit, offset)
+	if err != nil {
+		return
+	}
+	defer rows.Close()
+
+	users := make([]entities.User, 0, limit)
+	for rows.Next() {
+		var model models.User
+		if err := rows.StructScan(&model); err != nil {
+			return repositories.GetAllResponse{}, err
+		}
+		user, err := model.Entity()
+		if err != nil {
+			return repositories.GetAllResponse{}, err
+		}
+
+		users = append(users, user)
+	}
+
+	return repositories.GetAllResponse{
+		Users: users,
+	}, nil
+}

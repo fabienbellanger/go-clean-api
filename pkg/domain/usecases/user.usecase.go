@@ -51,13 +51,17 @@ func (uc userUseCase) GetAccessToken(req GetAccessTokenRequest) (GetAccessTokenR
 	if err != nil {
 		var e *utils.HTTPError
 		if errors.Is(err, repositories.ErrUserNotFound) {
-			e = utils.NewHTTPError(utils.StatusUnauthorized, "Unauthorizedd", nil, err)
+			e = utils.NewHTTPError(
+				utils.StatusUnauthorized,
+				"Unauthorizedd",
+				nil,
+				fmt.Errorf("[user_uc:GetAccessToken] %w: (%v)", repositories.ErrUserNotFound, err))
 		} else {
 			e = utils.NewHTTPError(
 				utils.StatusInternalServerError,
 				"Internal server error",
 				"Error during authentication",
-				fmt.Errorf("[user_uc:GetAccessToken] %w: (%v)", repositories.ErrUserNotFound, err))
+				fmt.Errorf("[user_uc:GetAccessToken] %w: (%v)", repositories.ErrDatabase, err))
 		}
 		return GetAccessTokenResponse{}, e
 	}
@@ -117,17 +121,11 @@ func (uc userUseCase) Create(req CreateRequest) (CreateResponse, *utils.HTTPErro
 		UpdatedAt: now,
 	})
 	if err != nil {
-		var e *utils.HTTPError
-		if errors.Is(err, repositories.ErrUserNotFound) {
-			e = utils.NewHTTPError(utils.StatusInternalServerError, "Error when creating user", nil, err)
-		} else {
-			e = utils.NewHTTPError(
-				utils.StatusInternalServerError,
-				"Internal server error",
-				"Error during user creation",
-				fmt.Errorf("[user_uc:Create] %w: (%v)", repositories.ErrUserNotFound, err))
-		}
-		return CreateResponse{}, e
+		return CreateResponse{}, utils.NewHTTPError(
+			utils.StatusInternalServerError,
+			"Internal server error",
+			"Error during user creation",
+			fmt.Errorf("[user_uc:Create] %w: (%v)", repositories.ErrCreatingUser, err))
 	}
 
 	return CreateResponse{
@@ -156,13 +154,17 @@ func (uc userUseCase) GetByID(req GetByIDRequest) (GetByIDResponse, *utils.HTTPE
 	if err != nil {
 		var e *utils.HTTPError
 		if errors.Is(err, repositories.ErrUserNotFound) {
-			e = utils.NewHTTPError(utils.StatusNotFound, "No user found", nil, err)
+			e = utils.NewHTTPError(
+				utils.StatusNotFound,
+				"No user found",
+				nil,
+				fmt.Errorf("[user_uc:GetByID] %w: (%v)", repositories.ErrUserNotFound, err))
 		} else {
 			e = utils.NewHTTPError(
 				utils.StatusInternalServerError,
 				"Internal server error",
 				"Error when getting user",
-				fmt.Errorf("[user_uc:GetByID] %w: (%v)", repositories.ErrUserNotFound, err))
+				fmt.Errorf("[user_uc:GetByID] %w: (%v)", repositories.ErrGettingUser, err))
 		}
 		return GetByIDResponse{}, e
 	}
@@ -178,20 +180,46 @@ func (uc userUseCase) GetByID(req GetByIDRequest) (GetByIDResponse, *utils.HTTPE
 
 // GetAllRequest is the data transfer object for the GetAll method request.
 type GetAllRequest struct {
-	Page     uint
-	Limit    uint
-	MaxLimit uint
-	Deleted  bool
+	Pagination vo.Pagination
+	Deleted    bool
 }
 
 // GetAllResponse is the data transfer object for the GetAll method response.
 type GetAllResponse struct {
 	Data  []entities.User
-	Total uint
+	Total int
 }
 
 // GetAll returns all users (pagination).
 func (uc userUseCase) GetAll(req GetAllRequest) (GetAllResponse, *utils.HTTPError) {
-	// TODO: Implement
-	return GetAllResponse{}, nil
+	// Get total users
+	resTotal, err := uc.userRepository.CountAll(repositories.CountAllRequest{Deleted: req.Deleted})
+	if err != nil {
+		return GetAllResponse{}, utils.NewHTTPError(
+			utils.StatusInternalServerError,
+			"Internal server error",
+			"Error when getting users",
+			fmt.Errorf("[user_uc:GetAll] %w: (%v)", repositories.ErrCountingUsers, err))
+	}
+	total := resTotal.Total
+
+	users := []entities.User{}
+	if total > 0 {
+		// Get users
+		resUsers, err := uc.userRepository.GetAll(repositories.GetAllRequest{Pagination: req.Pagination, Deleted: req.Deleted})
+		if err != nil {
+			return GetAllResponse{}, utils.NewHTTPError(
+				utils.StatusInternalServerError,
+				"Internal server error",
+				"Error when getting users",
+				fmt.Errorf("[user_uc:GetAll] %w: (%v)", repositories.ErrGettingUsers, err))
+		}
+
+		users = resUsers.Users
+	}
+
+	return GetAllResponse{
+		Data:  users,
+		Total: total,
+	}, nil
 }

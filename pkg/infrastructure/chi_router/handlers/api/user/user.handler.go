@@ -3,6 +3,7 @@ package user
 import (
 	"encoding/json"
 	"go-clean-api/pkg/domain/usecases"
+	vo "go-clean-api/pkg/domain/value_objects"
 	"go-clean-api/pkg/infrastructure/chi_router/handlers"
 	"go-clean-api/pkg/infrastructure/logger"
 	"go-clean-api/utils"
@@ -35,6 +36,8 @@ func (h *Handler) PublicRoutes() {
 // PrivateRoutes adds users private routes
 func (h *Handler) PrivateRoutes() {
 	h.router.Post("/", handlers.WrapError(h.register, h.logger))
+	h.router.Get("/", handlers.WrapError(h.GetAll, h.logger))
+	h.router.Get("/deleted", handlers.WrapError(h.GetAllDeleted, h.logger))
 	h.router.Get("/{id}", handlers.WrapError(h.getByID, h.logger))
 }
 
@@ -107,6 +110,42 @@ func (u *Handler) getByID(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	res := GetByIDResponse{}.FromEntity(resUC)
+
+	return utils.JSON(w, res)
+}
+
+func (u *Handler) GetAll(w http.ResponseWriter, r *http.Request) error {
+	p := r.URL.Query().Get("page")
+	s := r.URL.Query().Get("size")
+	pagination := vo.PaginationFromQuery(p, s, "")
+
+	users, errUC := u.userUseCase.GetAll(usecases.GetAllRequest{
+		Pagination: pagination,
+		Deleted:    false,
+	})
+	if errUC != nil {
+		return errUC.SendError(w)
+	}
+
+	res := GetAllResponse{}.FromEntity(users, pagination)
+
+	return utils.JSON(w, res)
+}
+
+func (u *Handler) GetAllDeleted(w http.ResponseWriter, r *http.Request) error {
+	p := r.URL.Query().Get("page")
+	s := r.URL.Query().Get("size")
+	pagination := vo.PaginationFromQuery(p, s, "")
+
+	users, errUC := u.userUseCase.GetAll(usecases.GetAllRequest{
+		Pagination: pagination,
+		Deleted:    true,
+	})
+	if errUC != nil {
+		return errUC.SendError(w)
+	}
+
+	res := GetAllResponse{}.FromEntity(users, pagination)
 
 	return utils.JSON(w, res)
 }

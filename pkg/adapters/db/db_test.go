@@ -137,12 +137,12 @@ func TestPaginateValues(t *testing.T) {
 
 	tests := []struct {
 		name   string
-		args   []string
+		args   []int
 		wanted result
 	}{
 		{
 			name: "Simple valid pagination",
-			args: []string{"1", "10"},
+			args: []int{1, 10},
 			wanted: result{
 				offset: 0,
 				limit:  10,
@@ -150,7 +150,7 @@ func TestPaginateValues(t *testing.T) {
 		},
 		{
 			name: "Invalid page",
-			args: []string{"a", "10"},
+			args: []int{0, 10},
 			wanted: result{
 				offset: 0,
 				limit:  10,
@@ -158,26 +158,26 @@ func TestPaginateValues(t *testing.T) {
 		},
 		{
 			name: "Invalid limit",
-			args: []string{"1", "a"},
+			args: []int{1, 0},
 			wanted: result{
 				offset: 0,
-				limit:  100,
+				limit:  500,
 			},
 		},
 		{
 			name: "Invalid page and limit",
-			args: []string{"a", "a"},
+			args: []int{0, 0},
 			wanted: result{
 				offset: 0,
-				limit:  100,
+				limit:  500,
 			},
 		},
 		{
 			name: "Limit too high",
-			args: []string{"1", "200"},
+			args: []int{1, 200},
 			wanted: result{
 				offset: 0,
-				limit:  100,
+				limit:  200,
 			},
 		},
 	}

@@ -4,13 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"go-clean-api/pkg"
-	"strconv"
+	values_objects "go-clean-api/pkg/domain/value_objects"
 	"strings"
-)
-
-const (
-	// MaxLimit represents the max number of items for pagination
-	MaxLimit = 100
 )
 
 // Config represents the MySQL database configuration
@@ -43,18 +38,17 @@ func (c *Config) dsn() (dsn string, err error) {
 }
 
 // PaginateValues transforms page and limit into offset and limit.
-func PaginateValues(p, l string) (offset int, limit int) {
-	page, err := strconv.Atoi(p)
-	if err != nil || page < 1 {
-		page = 1
+func PaginateValues(p, l int) (offset int, limit int) {
+	if p < 1 {
+		p = 1
 	}
 
-	limit, err = strconv.Atoi(l)
-	if err != nil || limit > MaxLimit || limit < 1 {
-		limit = MaxLimit
+	limit = l
+	if limit > values_objects.PaginationMaxSize || limit < 1 {
+		limit = values_objects.PaginationMaxSize
 	}
 
-	offset = (page - 1) * limit
+	offset = (p - 1) * limit
 
 	return
 }

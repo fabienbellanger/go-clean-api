@@ -9,9 +9,9 @@ import (
 func TestNewPagination(t *testing.T) {
 	tests := []struct {
 		name    string
-		page    uint
-		size    uint
-		maxSize uint
+		page    int
+		size    int
+		maxSize int
 		want    Pagination
 	}{
 		{

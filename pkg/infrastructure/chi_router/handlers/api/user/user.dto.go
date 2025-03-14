@@ -5,6 +5,16 @@ import (
 	vo "go-clean-api/pkg/domain/value_objects"
 )
 
+type UserResponse struct {
+	ID        string `json:"id" xml:"id"`
+	Email     string `json:"email" xml:"email"`
+	Lastname  string `json:"lastname" xml:"lastname"`
+	Firstname string `json:"firstname" xml:"firstname"`
+	CreatedAt string `json:"created_at" xml:"created_at"`
+	UpdatedAt string `json:"updated_at" xml:"updated_at"`
+	DeletedAt string `json:"deleted_at,omitempty" xml:"deleted_at,omitempty"`
+}
+
 //
 // ======== GetAccessToken ========
 //
@@ -97,13 +107,7 @@ func (r GetByIDRequest) ToUseCase() (usecases.GetByIDRequest, error) {
 }
 
 type GetByIDResponse struct {
-	ID        string `json:"id" xml:"id"`
-	Email     string `json:"email" xml:"email"`
-	Lastname  string `json:"lastname" xml:"lastname"`
-	Firstname string `json:"firstname" xml:"firstname"`
-	CreatedAt string `json:"created_at" xml:"created_at"`
-	UpdatedAt string `json:"updated_at" xml:"updated_at"`
-	DeletedAt string `json:"deleted_at,omitempty" xml:"deleted_at,omitempty"`
+	UserResponse
 }
 
 // TODO: Add tests
@@ -120,6 +124,44 @@ func (r GetByIDResponse) FromEntity(res usecases.GetByIDResponse) GetByIDRespons
 	r.CreatedAt = res.CreatedAt.RFC3339()
 	r.UpdatedAt = res.UpdatedAt.RFC3339()
 	r.DeletedAt = deletedAt
+
+	return r
+}
+
+//
+// ======== Get all ========
+//
+
+type GetAllResponse struct {
+	Data  []UserResponse `json:"data" xml:"data"`
+	Page  int            `json:"page" xml:"page"`
+	Size  int            `json:"size" xml:"size"`
+	Total int            `json:"total" xml:"total"`
+}
+
+// TODO: Add tests
+func (r GetAllResponse) FromEntity(res usecases.GetAllResponse, pagination vo.Pagination) GetAllResponse {
+	r.Data = make([]UserResponse, len(res.Data))
+	for i, user := range res.Data {
+		deletedAt := ""
+		if user.DeletedAt != nil {
+			deletedAt = user.DeletedAt.RFC3339()
+		}
+
+		r.Data[i] = UserResponse{
+			ID:        user.ID.String(),
+			Email:     user.Email.Value(),
+			Lastname:  user.Lastname,
+			Firstname: user.Firstname,
+			CreatedAt: user.CreatedAt.RFC3339(),
+			UpdatedAt: user.UpdatedAt.RFC3339(),
+			DeletedAt: deletedAt,
+		}
+	}
+
+	r.Total = res.Total
+	r.Page = pagination.Page()
+	r.Size = pagination.Size()
 
 	return r
 }

@@ -1,5 +1,7 @@
 package values_objects
 
+import "strconv"
+
 const (
 	// Pagination min size
 	PaginationMinSize = 50
@@ -12,15 +14,15 @@ const (
 )
 
 type Pagination struct {
-	page    uint
-	size    uint
-	maxSize uint
+	page    int
+	size    int
+	maxSize int
 }
 
 // NewPagination creates a new Pagination
-func NewPagination(page, size, maxSize uint) Pagination {
+func NewPagination(page, size, maxSize int) Pagination {
 	p := page
-	if page == 0 {
+	if page < 1 {
 		p = 1
 	}
 
@@ -43,10 +45,38 @@ func NewPagination(page, size, maxSize uint) Pagination {
 	}
 }
 
-func (p Pagination) Page() uint {
+// TODO: Add test
+func PaginationFromQuery(page, size, maxSize string) Pagination {
+	p, err := strconv.Atoi(page)
+	if err != nil || p < 1 {
+		p = 1
+	}
+
+	m, err := strconv.Atoi(maxSize)
+	if err != nil || m == 0 || m > PaginationMaxSize {
+		m = PaginationMaxSize
+	}
+
+	s, err := strconv.Atoi(size)
+	if err != nil {
+		s = PaginationDefaultSize
+	} else if s > m {
+		s = m
+	} else if s < PaginationMinSize {
+		s = PaginationMinSize
+	}
+
+	return Pagination{
+		page:    p,
+		size:    s,
+		maxSize: m,
+	}
+}
+
+func (p Pagination) Page() int {
 	return p.page
 }
 
-func (p Pagination) Size() uint {
+func (p Pagination) Size() int {
 	return p.size
 }
