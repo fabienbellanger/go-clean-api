@@ -27,6 +27,9 @@ var (
 
 	// ErrCreatingUser is the error returned when creating user.
 	ErrCreatingUser = errors.New("error when creating user")
+
+	// ErrDeletingUser is the error returned when deleting user.
+	ErrDeletingUser = errors.New("error when deleting user")
 )
 
 // User is the interface that wraps the basic methods to interact with the user repository.
@@ -36,6 +39,7 @@ type User interface {
 	GetByID(GetByIDRequest) (GetByIDResponse, error)
 	GetAll(GetAllRequest) (GetAllResponse, error)
 	CountAll(CountAllRequest) (CountAllResponse, error)
+	Delete(DeleteRequest) (DeleteResponse, error)
 }
 
 //
@@ -113,3 +117,15 @@ type CountAllRequest struct {
 type CountAllResponse struct {
 	Total int
 }
+
+//
+// ======== Delete ========
+//
+
+// DeleteRequest is the data transfer object for the Delete method request.
+type DeleteRequest struct {
+	ID entities.UserID
+}
+
+// DeleteResponse is the data transfer object for the Delete method response.
+type DeleteResponse struct{}

@@ -17,6 +17,7 @@ type User interface {
 	Create(CreateRequest) (CreateResponse, *utils.HTTPError)
 	GetByID(GetByIDRequest) (GetByIDResponse, *utils.HTTPError)
 	GetAll(GetAllRequest) (GetAllResponse, *utils.HTTPError)
+	Delete(DeleteRequest) (DeleteResponse, *utils.HTTPError)
 }
 
 type userUseCase struct {
@@ -149,7 +150,6 @@ type GetByIDResponse struct {
 
 // GetByID returns a user by its ID.
 func (uc userUseCase) GetByID(req GetByIDRequest) (GetByIDResponse, *utils.HTTPError) {
-	// Get user by ID
 	res, err := uc.userRepository.GetByID(repositories.GetByIDRequest{ID: req.ID})
 	if err != nil {
 		var e *utils.HTTPError
@@ -222,4 +222,40 @@ func (uc userUseCase) GetAll(req GetAllRequest) (GetAllResponse, *utils.HTTPErro
 		Data:  users,
 		Total: total,
 	}, nil
+}
+
+//
+// ======== Delete ========
+//
+
+// DeleteRequest is the data transfer object for the DeleteD method request.
+type DeleteRequest struct {
+	ID entities.UserID
+}
+
+// DeleteResponse is the data transfer object for the DeleteD method response.
+type DeleteResponse struct{}
+
+// Delete a user by its ID.
+func (uc userUseCase) Delete(req DeleteRequest) (DeleteResponse, *utils.HTTPError) {
+	_, err := uc.userRepository.Delete(repositories.DeleteRequest{ID: req.ID})
+	if err != nil {
+		var e *utils.HTTPError
+		if errors.Is(err, repositories.ErrUserNotFound) {
+			e = utils.NewHTTPError(
+				utils.StatusNotFound,
+				"No user found",
+				nil,
+				fmt.Errorf("[user_uc:GetByID] %w: (%v)", repositories.ErrUserNotFound, err))
+		} else {
+			e = utils.NewHTTPError(
+				utils.StatusInternalServerError,
+				"Internal server error",
+				"Error when deleting user",
+				fmt.Errorf("[user_uc:GetByID] %w: (%v)", repositories.ErrDeletingUser, err))
+		}
+		return DeleteResponse{}, e
+	}
+
+	return DeleteResponse{}, nil
 }

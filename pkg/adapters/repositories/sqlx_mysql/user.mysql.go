@@ -156,3 +156,7 @@ func (u *User) GetAll(req repositories.GetAllRequest) (res repositories.GetAllRe
 		Users: users,
 	}, nil
 }
+
+func (u *User) Delete(req repositories.DeleteRequest) (res repositories.DeleteResponse, err error) {
+	return
+}
