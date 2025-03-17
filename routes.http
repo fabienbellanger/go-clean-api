@@ -1,6 +1,6 @@
 @base_url = http://localhost:3003/api/v1
 
-@access_token = eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDE5NzIzMzgsImlhdCI6MTc0MTk2NTEzOCwibmJmIjoxNzQxOTY1MTM4LCJzdWIiOiJiMDFkNjUzYS05YjRhLTQ3YWEtOTk3Zi04YWY4YWJlMDY3MzEifQ.BYJSsltvWEKchMh5uNeZrSUgLfkw8WfLCoHfsC9qwMDlr7yMjddyGKV9nCeeGwy-gj4a9KH-WDrmPyhtv_O13g
+@access_token = eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDIyMjM5NzksImlhdCI6MTc0MjIxNjc3OSwibmJmIjoxNzQyMjE2Nzc5LCJzdWIiOiJiMDFkNjUzYS05YjRhLTQ3YWEtOTk3Zi04YWY4YWJlMDY3MzEifQ.6gibgicWGx1GgHElcfb6YDf1Ju2oOU9kcODgM-IX3bIzyHArcOTGLu5eBGJoq9Gvoo8we0AF-rYiao6Ntl7l5A
 
 @user_id = b01d653a-9b4a-47aa-997f-8af8abe06731
 @email = john.doe@test.com
@@ -53,6 +53,20 @@ Authorization: Bearer {{access_token}}
 
 # Get all users deleted
 GET {{base_url}}/users/deleted?page=1&size=10
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+###
+
+# Delete user by ID
+DELETE {{base_url}}/users/01c37650-abd0-4bc8-bd4c-995de4110a28
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+###
+
+# Restore user by ID
+PATCH {{base_url}}/users/01c37650-abd0-4bc8-bd4c-995de4110a28/restore
 Content-Type: application/json
 Authorization: Bearer {{access_token}}
 

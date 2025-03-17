@@ -128,6 +128,19 @@ func JSON(w http.ResponseWriter, data any) error {
 	return nil
 }
 
+func Created(w http.ResponseWriter, data any) error {
+	res, err := json.Marshal(data)
+	if err != nil {
+		return Err500(w, err, "error when JSON encoding the response", nil)
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	w.Write(res)
+
+	return nil
+}
+
 func NoContent(w http.ResponseWriter) error {
 	w.WriteHeader(http.StatusNoContent)
 

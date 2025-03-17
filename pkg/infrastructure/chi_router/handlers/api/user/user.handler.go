@@ -39,6 +39,8 @@ func (h *Handler) PrivateRoutes() {
 	h.router.Get("/", handlers.WrapError(h.GetAll, h.logger))
 	h.router.Get("/deleted", handlers.WrapError(h.GetAllDeleted, h.logger))
 	h.router.Get("/{id}", handlers.WrapError(h.getByID, h.logger))
+	h.router.Delete("/{id}", handlers.WrapError(h.delete, h.logger))
+	h.router.Patch("/{id}/restore", handlers.WrapError(h.restore, h.logger))
 }
 
 func (u *Handler) token(w http.ResponseWriter, r *http.Request) error {
@@ -90,7 +92,7 @@ func (u *Handler) register(w http.ResponseWriter, r *http.Request) error {
 		UpdatedAt: resUC.UpdatedAt.RFC3339(),
 	}
 
-	return utils.JSON(w, res)
+	return utils.Created(w, res)
 }
 
 func (u *Handler) getByID(w http.ResponseWriter, r *http.Request) error {
@@ -119,7 +121,7 @@ func (u *Handler) GetAll(w http.ResponseWriter, r *http.Request) error {
 	s := r.URL.Query().Get("size")
 	pagination := vo.PaginationFromQuery(p, s, "")
 
-	users, errUC := u.userUseCase.GetAll(usecases.GetAllRequest{
+	users, errUC := u.userUseCase.GetAll(usecases.GetAllUsersRequest{
 		Pagination: pagination,
 		Deleted:    false,
 	})
@@ -137,7 +139,7 @@ func (u *Handler) GetAllDeleted(w http.ResponseWriter, r *http.Request) error {
 	s := r.URL.Query().Get("size")
 	pagination := vo.PaginationFromQuery(p, s, "")
 
-	users, errUC := u.userUseCase.GetAll(usecases.GetAllRequest{
+	users, errUC := u.userUseCase.GetAll(usecases.GetAllUsersRequest{
 		Pagination: pagination,
 		Deleted:    true,
 	})
@@ -148,4 +150,42 @@ func (u *Handler) GetAllDeleted(w http.ResponseWriter, r *http.Request) error {
 	res := GetAllResponse{}.FromEntity(users, pagination)
 
 	return utils.JSON(w, res)
+}
+
+func (u *Handler) delete(w http.ResponseWriter, r *http.Request) error {
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		return utils.Err400(w, nil, "ID is required", nil)
+	}
+
+	req, err := DeleteRestoreRequest{ID: id}.ToUseCase()
+	if err != nil {
+		return utils.Err400(w, err, "Invalid parameters", err)
+	}
+
+	_, errUC := u.userUseCase.Delete(req)
+	if errUC != nil {
+		return errUC.SendError(w)
+	}
+
+	return utils.NoContent(w)
+}
+
+func (u *Handler) restore(w http.ResponseWriter, r *http.Request) error {
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		return utils.Err400(w, nil, "ID is required", nil)
+	}
+
+	req, err := DeleteRestoreRequest{ID: id}.ToUseCase()
+	if err != nil {
+		return utils.Err400(w, err, "Invalid parameters", err)
+	}
+
+	_, errUC := u.userUseCase.Restore(req)
+	if errUC != nil {
+		return errUC.SendError(w)
+	}
+
+	return utils.NoContent(w)
 }

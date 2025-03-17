@@ -95,7 +95,9 @@ paths:
           name: size
           schema:
             type: integer
-            maximum: 100
+            default: 100
+            minimum: 50
+            maximum: 500
           required: false
           description: Number of users per page
           example: 10
@@ -143,7 +145,9 @@ paths:
           name: size
           schema:
             type: integer
-            maximum: 100
+            default: 100
+            minimum: 50
+            maximum: 500
           required: false
           description: Number of users per page
           example: 10
@@ -187,12 +191,67 @@ paths:
           required: true
           description: User ID
       responses:
-        '200':
+        '201':
           description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
+        '400':
+            $ref: "#/components/responses/BadRequest"
+        '401':
+            $ref: "#/components/responses/Unauthorized"
+        '404':
+            $ref: "#/components/responses/NotFound"
+        '500':
+            $ref: "#/components/responses/InternalServerError"
+
+    delete:
+      summary: ""
+      description: Delete user
+      tags:
+        - "Users"
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: User ID
+      responses:
+        '204':
+          description: OK
+        '400':
+            $ref: "#/components/responses/BadRequest"
+        '401':
+            $ref: "#/components/responses/Unauthorized"
+        '404':
+            $ref: "#/components/responses/NotFound"
+        '500':
+            $ref: "#/components/responses/InternalServerError"
+
+  /users/{id}/restore:
+    patch:
+      summary: ""
+      description: Restore user
+      tags:
+        - "Users"
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: User ID
+      responses:
+        '204':
+          description: OK
         '400':
             $ref: "#/components/responses/BadRequest"
         '401':

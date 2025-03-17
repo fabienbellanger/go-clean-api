@@ -59,7 +59,7 @@ var userCmd = &cobra.Command{
 		// Call use case
 		userRepo := sqlx_mysql.NewUser(db)
 		userUseCase := usecases.NewUser(userRepo, config.JWT)
-		res, errRes := userUseCase.Create(usecases.CreateRequest{
+		res, errRes := userUseCase.Create(usecases.CreateUserRequest{
 			Email:     email,
 			Password:  password,
 			Lastname:  strings.TrimSpace(userLastname),

@@ -59,18 +59,18 @@ type CreateRequest struct {
 }
 
 // TODO: Add tests
-func (r CreateRequest) ToUseCase() (usecases.CreateRequest, error) {
+func (r CreateRequest) ToUseCase() (usecases.CreateUserRequest, error) {
 	email, err := vo.NewEmail(r.Email)
 	if err != nil {
-		return usecases.CreateRequest{}, err
+		return usecases.CreateUserRequest{}, err
 	}
 
 	password, err := vo.NewPassword(r.Password)
 	if err != nil {
-		return usecases.CreateRequest{}, err
+		return usecases.CreateUserRequest{}, err
 	}
 
-	return usecases.CreateRequest{
+	return usecases.CreateUserRequest{
 		Email:     email,
 		Password:  password,
 		Lastname:  r.Lastname,
@@ -92,16 +92,16 @@ type CreateResponse struct {
 //
 
 type GetByIDRequest struct {
-	ID string `json:"id" xml:"id"`
+	ID string
 }
 
-func (r GetByIDRequest) ToUseCase() (usecases.GetByIDRequest, error) {
+func (r GetByIDRequest) ToUseCase() (usecases.GetUserByIDRequest, error) {
 	id, err := vo.NewIDFrom(r.ID)
 	if err != nil {
-		return usecases.GetByIDRequest{}, err
+		return usecases.GetUserByIDRequest{}, err
 	}
 
-	return usecases.GetByIDRequest{
+	return usecases.GetUserByIDRequest{
 		ID: id,
 	}, nil
 }
@@ -111,7 +111,7 @@ type GetByIDResponse struct {
 }
 
 // TODO: Add tests
-func (r GetByIDResponse) FromEntity(res usecases.GetByIDResponse) GetByIDResponse {
+func (r GetByIDResponse) FromEntity(res usecases.GetUserByIDResponse) GetByIDResponse {
 	deletedAt := ""
 	if res.DeletedAt != nil {
 		deletedAt = res.DeletedAt.RFC3339()
@@ -140,7 +140,7 @@ type GetAllResponse struct {
 }
 
 // TODO: Add tests
-func (r GetAllResponse) FromEntity(res usecases.GetAllResponse, pagination vo.Pagination) GetAllResponse {
+func (r GetAllResponse) FromEntity(res usecases.GetAllUsersResponse, pagination vo.Pagination) GetAllResponse {
 	r.Data = make([]UserResponse, len(res.Data))
 	for i, user := range res.Data {
 		deletedAt := ""
@@ -164,4 +164,23 @@ func (r GetAllResponse) FromEntity(res usecases.GetAllResponse, pagination vo.Pa
 	r.Size = pagination.Size()
 
 	return r
+}
+
+//
+// ======== Delete / Restore ========
+//
+
+type DeleteRestoreRequest struct {
+	ID string
+}
+
+func (r DeleteRestoreRequest) ToUseCase() (usecases.DeleteRestoreUserRequest, error) {
+	id, err := vo.NewIDFrom(r.ID)
+	if err != nil {
+		return usecases.DeleteRestoreUserRequest{}, err
+	}
+
+	return usecases.DeleteRestoreUserRequest{
+		ID: id,
+	}, nil
 }

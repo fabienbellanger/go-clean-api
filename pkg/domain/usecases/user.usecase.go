@@ -14,10 +14,11 @@ import (
 // User is an interface for user use cases.
 type User interface {
 	GetAccessToken(GetAccessTokenRequest) (GetAccessTokenResponse, *utils.HTTPError)
-	Create(CreateRequest) (CreateResponse, *utils.HTTPError)
-	GetByID(GetByIDRequest) (GetByIDResponse, *utils.HTTPError)
-	GetAll(GetAllRequest) (GetAllResponse, *utils.HTTPError)
-	Delete(DeleteRequest) (DeleteResponse, *utils.HTTPError)
+	Create(CreateUserRequest) (CreateUserResponse, *utils.HTTPError)
+	GetByID(GetUserByIDRequest) (GetUserByIDResponse, *utils.HTTPError)
+	GetAll(GetAllUsersRequest) (GetAllUsersResponse, *utils.HTTPError)
+	Delete(DeleteRestoreUserRequest) (DeleteRestoreUserResponse, *utils.HTTPError)
+	Restore(DeleteRestoreUserRequest) (DeleteRestoreUserResponse, *utils.HTTPError)
 }
 
 type userUseCase struct {
@@ -87,27 +88,27 @@ func (uc userUseCase) GetAccessToken(req GetAccessTokenRequest) (GetAccessTokenR
 // ======== Create ========
 //
 
-type CreateRequest struct {
+type CreateUserRequest struct {
 	Email     vo.Email
 	Password  vo.Password
 	Lastname  string
 	Firstname string
 }
 
-type CreateResponse struct {
+type CreateUserResponse struct {
 	entities.User
 }
 
 // Create a new user.
-func (uc userUseCase) Create(req CreateRequest) (CreateResponse, *utils.HTTPError) {
+func (uc userUseCase) Create(req CreateUserRequest) (CreateUserResponse, *utils.HTTPError) {
 	// Hash password
 	hashedPassword, err := req.Password.HashUserPassword()
 	if err != nil {
-		return CreateResponse{}, utils.NewHTTPError(utils.StatusInternalServerError, "Error when hashing password", nil, err)
+		return CreateUserResponse{}, utils.NewHTTPError(utils.StatusInternalServerError, "Error when hashing password", nil, err)
 	}
 	password, err := vo.NewPassword(hashedPassword)
 	if err != nil {
-		return CreateResponse{}, utils.NewHTTPError(utils.StatusInternalServerError, "Error when creating password", nil, err)
+		return CreateUserResponse{}, utils.NewHTTPError(utils.StatusInternalServerError, "Error when creating password", nil, err)
 	}
 
 	// Add user to the database
@@ -122,14 +123,14 @@ func (uc userUseCase) Create(req CreateRequest) (CreateResponse, *utils.HTTPErro
 		UpdatedAt: now,
 	})
 	if err != nil {
-		return CreateResponse{}, utils.NewHTTPError(
+		return CreateUserResponse{}, utils.NewHTTPError(
 			utils.StatusInternalServerError,
 			"Internal server error",
 			"Error during user creation",
 			fmt.Errorf("[user_uc:Create] %w: (%v)", repositories.ErrCreatingUser, err))
 	}
 
-	return CreateResponse{
+	return CreateUserResponse{
 		User: respoRes.User,
 	}, nil
 }
@@ -138,18 +139,18 @@ func (uc userUseCase) Create(req CreateRequest) (CreateResponse, *utils.HTTPErro
 // ======== Get by ID ========
 //
 
-// GetByIDRequest is the data transfer object for the GetByID method request.
-type GetByIDRequest struct {
+// GetUserByIDRequest is the data transfer object for the GetByID method request.
+type GetUserByIDRequest struct {
 	ID entities.UserID
 }
 
-// GetByIDResponse is the data transfer object for the GetByID method response.
-type GetByIDResponse struct {
+// GetUserByIDResponse is the data transfer object for the GetByID method response.
+type GetUserByIDResponse struct {
 	entities.User
 }
 
 // GetByID returns a user by its ID.
-func (uc userUseCase) GetByID(req GetByIDRequest) (GetByIDResponse, *utils.HTTPError) {
+func (uc userUseCase) GetByID(req GetUserByIDRequest) (GetUserByIDResponse, *utils.HTTPError) {
 	res, err := uc.userRepository.GetByID(repositories.GetByIDRequest{ID: req.ID})
 	if err != nil {
 		var e *utils.HTTPError
@@ -166,10 +167,10 @@ func (uc userUseCase) GetByID(req GetByIDRequest) (GetByIDResponse, *utils.HTTPE
 				"Error when getting user",
 				fmt.Errorf("[user_uc:GetByID] %w: (%v)", repositories.ErrGettingUser, err))
 		}
-		return GetByIDResponse{}, e
+		return GetUserByIDResponse{}, e
 	}
 
-	return GetByIDResponse{
+	return GetUserByIDResponse{
 		User: res.User,
 	}, nil
 }
@@ -178,24 +179,24 @@ func (uc userUseCase) GetByID(req GetByIDRequest) (GetByIDResponse, *utils.HTTPE
 // ======== GetAll ========
 //
 
-// GetAllRequest is the data transfer object for the GetAll method request.
-type GetAllRequest struct {
+// GetAllUsersRequest is the data transfer object for the GetAll method request.
+type GetAllUsersRequest struct {
 	Pagination vo.Pagination
 	Deleted    bool
 }
 
-// GetAllResponse is the data transfer object for the GetAll method response.
-type GetAllResponse struct {
+// GetAllUsersResponse is the data transfer object for the GetAll method response.
+type GetAllUsersResponse struct {
 	Data  []entities.User
 	Total int
 }
 
 // GetAll returns all users (pagination).
-func (uc userUseCase) GetAll(req GetAllRequest) (GetAllResponse, *utils.HTTPError) {
+func (uc userUseCase) GetAll(req GetAllUsersRequest) (GetAllUsersResponse, *utils.HTTPError) {
 	// Get total users
 	resTotal, err := uc.userRepository.CountAll(repositories.CountAllRequest{Deleted: req.Deleted})
 	if err != nil {
-		return GetAllResponse{}, utils.NewHTTPError(
+		return GetAllUsersResponse{}, utils.NewHTTPError(
 			utils.StatusInternalServerError,
 			"Internal server error",
 			"Error when getting users",
@@ -208,7 +209,7 @@ func (uc userUseCase) GetAll(req GetAllRequest) (GetAllResponse, *utils.HTTPErro
 		// Get users
 		resUsers, err := uc.userRepository.GetAll(repositories.GetAllRequest{Pagination: req.Pagination, Deleted: req.Deleted})
 		if err != nil {
-			return GetAllResponse{}, utils.NewHTTPError(
+			return GetAllUsersResponse{}, utils.NewHTTPError(
 				utils.StatusInternalServerError,
 				"Internal server error",
 				"Error when getting users",
@@ -218,27 +219,27 @@ func (uc userUseCase) GetAll(req GetAllRequest) (GetAllResponse, *utils.HTTPErro
 		users = resUsers.Users
 	}
 
-	return GetAllResponse{
+	return GetAllUsersResponse{
 		Data:  users,
 		Total: total,
 	}, nil
 }
 
 //
-// ======== Delete ========
+// ======== Delete / Restore ========
 //
 
-// DeleteRequest is the data transfer object for the DeleteD method request.
-type DeleteRequest struct {
+// DeleteRestoreUserRequest is the data transfer object for the DeleteD method request.
+type DeleteRestoreUserRequest struct {
 	ID entities.UserID
 }
 
-// DeleteResponse is the data transfer object for the DeleteD method response.
-type DeleteResponse struct{}
+// DeleteRestoreUserResponse is the data transfer object for the DeleteD method response.
+type DeleteRestoreUserResponse struct{}
 
 // Delete a user by its ID.
-func (uc userUseCase) Delete(req DeleteRequest) (DeleteResponse, *utils.HTTPError) {
-	_, err := uc.userRepository.Delete(repositories.DeleteRequest{ID: req.ID})
+func (uc userUseCase) Delete(req DeleteRestoreUserRequest) (DeleteRestoreUserResponse, *utils.HTTPError) {
+	_, err := uc.userRepository.Delete(repositories.DeleteRestoreRequest{ID: req.ID})
 	if err != nil {
 		var e *utils.HTTPError
 		if errors.Is(err, repositories.ErrUserNotFound) {
@@ -246,16 +247,40 @@ func (uc userUseCase) Delete(req DeleteRequest) (DeleteResponse, *utils.HTTPErro
 				utils.StatusNotFound,
 				"No user found",
 				nil,
-				fmt.Errorf("[user_uc:GetByID] %w: (%v)", repositories.ErrUserNotFound, err))
+				fmt.Errorf("[user_uc:Delete] %w: (%v)", repositories.ErrUserNotFound, err))
 		} else {
 			e = utils.NewHTTPError(
 				utils.StatusInternalServerError,
 				"Internal server error",
 				"Error when deleting user",
-				fmt.Errorf("[user_uc:GetByID] %w: (%v)", repositories.ErrDeletingUser, err))
+				fmt.Errorf("[user_uc:Delete] %w: (%v)", repositories.ErrDeletingUser, err))
 		}
-		return DeleteResponse{}, e
+		return DeleteRestoreUserResponse{}, e
 	}
 
-	return DeleteResponse{}, nil
+	return DeleteRestoreUserResponse{}, nil
+}
+
+// Restore a user by its ID.
+func (uc userUseCase) Restore(req DeleteRestoreUserRequest) (DeleteRestoreUserResponse, *utils.HTTPError) {
+	_, err := uc.userRepository.Restore(repositories.DeleteRestoreRequest{ID: req.ID})
+	if err != nil {
+		var e *utils.HTTPError
+		if errors.Is(err, repositories.ErrUserNotFound) {
+			e = utils.NewHTTPError(
+				utils.StatusNotFound,
+				"No user found",
+				nil,
+				fmt.Errorf("[user_uc:Restore] %w: (%v)", repositories.ErrUserNotFound, err))
+		} else {
+			e = utils.NewHTTPError(
+				utils.StatusInternalServerError,
+				"Internal server error",
+				"Error when restoring user",
+				fmt.Errorf("[user_uc:Restore] %w: (%v)", repositories.ErrRestoringUser, err))
+		}
+		return DeleteRestoreUserResponse{}, e
+	}
+
+	return DeleteRestoreUserResponse{}, nil
 }

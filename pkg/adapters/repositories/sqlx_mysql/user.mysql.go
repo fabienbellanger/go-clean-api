@@ -157,6 +157,47 @@ func (u *User) GetAll(req repositories.GetAllRequest) (res repositories.GetAllRe
 	}, nil
 }
 
-func (u *User) Delete(req repositories.DeleteRequest) (res repositories.DeleteResponse, err error) {
+func (u *User) Delete(req repositories.DeleteRestoreRequest) (res repositories.DeleteRestoreResponse, err error) {
+	result, err := u.db.Exec(`
+		UPDATE users
+		SET deleted_at = NOW()
+		WHERE id = ?
+			AND deleted_at IS NULL`,
+		req.ID.String(),
+	)
+	if err != nil {
+		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Delete] %w: (%v)", repositories.ErrDatabase, err)
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Delete] %w: (%v)", repositories.ErrDatabase, err)
+	}
+	if rowsAffected == 0 {
+		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Delete] %w: (%v)", repositories.ErrUserNotFound, err)
+	}
+
+	return
+}
+
+func (u *User) Restore(req repositories.DeleteRestoreRequest) (res repositories.DeleteRestoreResponse, err error) {
+	result, err := u.db.Exec(`
+		UPDATE users
+		SET deleted_at = NULL
+		WHERE id = ?
+			AND deleted_at IS NOT NULL`,
+		req.ID.String(),
+	)
+	if err != nil {
+		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Restore] %w: (%v)", repositories.ErrDatabase, err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Restore] %w: (%v)", repositories.ErrDatabase, err)
+	}
+	if rowsAffected == 0 {
+		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Restore] %w: (%v)", repositories.ErrUserNotFound, err)
+	}
+
 	return
 }
