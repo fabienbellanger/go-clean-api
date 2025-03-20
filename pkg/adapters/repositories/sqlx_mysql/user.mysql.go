@@ -32,12 +32,12 @@ func (u *User) GetByEmail(req repositories.GetByEmailRequest) (repositories.GetB
 		req.Email.Value(),
 	)
 	if err := row.StructScan(&model); err != nil {
-		return repositories.GetByEmailResponse{}, fmt.Errorf("[user_sqlx_mysql:GetByEmail] %w: (%v)", repositories.ErrUserNotFound, err)
+		return repositories.GetByEmailResponse{}, fmt.Errorf("[user_sqlx_mysql:GetByEmail] %w: %v", repositories.ErrUserNotFound, err)
 	}
 
 	response, err := model.Repository()
 	if err != nil {
-		return repositories.GetByEmailResponse{}, fmt.Errorf("[user_sqlx_mysql:GetByEmail] %w: (%v)", repositories.ErrConvertFromModel, err)
+		return repositories.GetByEmailResponse{}, fmt.Errorf("[user_sqlx_mysql:GetByEmail] %w: %v", repositories.ErrConvertFromModel, err)
 	}
 
 	return response, nil

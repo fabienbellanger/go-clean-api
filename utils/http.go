@@ -84,11 +84,7 @@ func (e *HTTPError) SendError(w http.ResponseWriter) error {
 	w.WriteHeader(e.Code)
 	w.Write(res)
 
-	// We only log internal server errors
-	if e.Code == StatusInternalServerError {
-		return e.Err
-	}
-	return nil
+	return e.Err
 }
 
 func Err(w http.ResponseWriter, status int, err error, msg string, details any) error {

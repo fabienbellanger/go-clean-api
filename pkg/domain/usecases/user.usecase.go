@@ -57,7 +57,7 @@ func (uc userUseCase) GetAccessToken(req GetAccessTokenRequest) (GetAccessTokenR
 				utils.StatusUnauthorized,
 				"Unauthorizedd",
 				nil,
-				fmt.Errorf("[user_uc:GetAccessToken] %w: (%v)", repositories.ErrUserNotFound, err))
+				fmt.Errorf("[user_uc:GetAccessToken] %v", err))
 		} else {
 			e = utils.NewHTTPError(
 				utils.StatusInternalServerError,
@@ -159,7 +159,7 @@ func (uc userUseCase) GetByID(req GetUserByIDRequest) (GetUserByIDResponse, *uti
 				utils.StatusNotFound,
 				"No user found",
 				nil,
-				fmt.Errorf("[user_uc:GetByID] %w: (%v)", repositories.ErrUserNotFound, err))
+				fmt.Errorf("[user_uc:GetByID] %v", err))
 		} else {
 			e = utils.NewHTTPError(
 				utils.StatusInternalServerError,
@@ -247,7 +247,7 @@ func (uc userUseCase) Delete(req DeleteRestoreUserRequest) (DeleteRestoreUserRes
 				utils.StatusNotFound,
 				"No user found",
 				nil,
-				fmt.Errorf("[user_uc:Delete] %w: (%v)", repositories.ErrUserNotFound, err))
+				fmt.Errorf("[user_uc:Delete] %v", err))
 		} else {
 			e = utils.NewHTTPError(
 				utils.StatusInternalServerError,
@@ -271,7 +271,7 @@ func (uc userUseCase) Restore(req DeleteRestoreUserRequest) (DeleteRestoreUserRe
 				utils.StatusNotFound,
 				"No user found",
 				nil,
-				fmt.Errorf("[user_uc:Restore] %w: (%v)", repositories.ErrUserNotFound, err))
+				fmt.Errorf("[user_uc:Restore] %v", err))
 		} else {
 			e = utils.NewHTTPError(
 				utils.StatusInternalServerError,
