@@ -63,7 +63,7 @@ func (uc userUseCase) GetAccessToken(req GetAccessTokenRequest) (GetAccessTokenR
 				utils.StatusInternalServerError,
 				"Internal server error",
 				"Error during authentication",
-				fmt.Errorf("[user_uc:GetAccessToken] %w: (%v)", repositories.ErrDatabase, err))
+				fmt.Errorf("[user_uc:GetAccessToken] %v", err))
 		}
 		return GetAccessTokenResponse{}, e
 	}
@@ -76,7 +76,11 @@ func (uc userUseCase) GetAccessToken(req GetAccessTokenRequest) (GetAccessTokenR
 	// Generate a token
 	accessToken, err := entities.NewAccessToken(userRepo.ID, uc.jwtConfig)
 	if err != nil {
-		return GetAccessTokenResponse{}, utils.NewHTTPError(utils.StatusInternalServerError, "Internal server error", "error during token generation", err)
+		return GetAccessTokenResponse{}, utils.NewHTTPError(
+			utils.StatusInternalServerError,
+			"Internal server error",
+			"error during token generation",
+			fmt.Errorf("[user_uc:GetAccessToken] token generation error: %v", err))
 	}
 
 	return GetAccessTokenResponse{
@@ -127,7 +131,7 @@ func (uc userUseCase) Create(req CreateUserRequest) (CreateUserResponse, *utils.
 			utils.StatusInternalServerError,
 			"Internal server error",
 			"Error during user creation",
-			fmt.Errorf("[user_uc:Create] %w: (%v)", repositories.ErrCreatingUser, err))
+			fmt.Errorf("[user_uc:Create] %v", err))
 	}
 
 	return CreateUserResponse{
@@ -165,7 +169,7 @@ func (uc userUseCase) GetByID(req GetUserByIDRequest) (GetUserByIDResponse, *uti
 				utils.StatusInternalServerError,
 				"Internal server error",
 				"Error when getting user",
-				fmt.Errorf("[user_uc:GetByID] %w: (%v)", repositories.ErrGettingUser, err))
+				fmt.Errorf("[user_uc:GetByID] %v", err))
 		}
 		return GetUserByIDResponse{}, e
 	}
@@ -200,7 +204,7 @@ func (uc userUseCase) GetAll(req GetAllUsersRequest) (GetAllUsersResponse, *util
 			utils.StatusInternalServerError,
 			"Internal server error",
 			"Error when getting users",
-			fmt.Errorf("[user_uc:GetAll] %w: (%v)", repositories.ErrCountingUsers, err))
+			fmt.Errorf("[user_uc:GetAll] %v", err))
 	}
 	total := resTotal.Total
 
@@ -213,7 +217,7 @@ func (uc userUseCase) GetAll(req GetAllUsersRequest) (GetAllUsersResponse, *util
 				utils.StatusInternalServerError,
 				"Internal server error",
 				"Error when getting users",
-				fmt.Errorf("[user_uc:GetAll] %w: (%v)", repositories.ErrGettingUsers, err))
+				fmt.Errorf("[user_uc:GetAll] %v", err))
 		}
 
 		users = resUsers.Users
@@ -253,7 +257,7 @@ func (uc userUseCase) Delete(req DeleteRestoreUserRequest) (DeleteRestoreUserRes
 				utils.StatusInternalServerError,
 				"Internal server error",
 				"Error when deleting user",
-				fmt.Errorf("[user_uc:Delete] %w: (%v)", repositories.ErrDeletingUser, err))
+				fmt.Errorf("[user_uc:Delete] %v", err))
 		}
 		return DeleteRestoreUserResponse{}, e
 	}
@@ -277,7 +281,7 @@ func (uc userUseCase) Restore(req DeleteRestoreUserRequest) (DeleteRestoreUserRe
 				utils.StatusInternalServerError,
 				"Internal server error",
 				"Error when restoring user",
-				fmt.Errorf("[user_uc:Restore] %w: (%v)", repositories.ErrRestoringUser, err))
+				fmt.Errorf("[user_uc:Restore] %v", err))
 		}
 		return DeleteRestoreUserResponse{}, e
 	}

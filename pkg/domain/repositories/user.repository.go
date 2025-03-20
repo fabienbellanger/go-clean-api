@@ -13,9 +13,6 @@ var (
 	// ErrDatabase is the error returned when a database error occurs.
 	ErrDatabase = errors.New("database error")
 
-	// ErrConvertFromModel is the error returned when a model cannot be converted to repository response.
-	ErrConvertFromModel = errors.New("error converting model to repository response")
-
 	// ErrCountingUsers is the error returned when counting users.
 	ErrCountingUsers = errors.New("error when counting users")
 

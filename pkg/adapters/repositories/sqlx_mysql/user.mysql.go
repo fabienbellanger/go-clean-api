@@ -32,12 +32,12 @@ func (u *User) GetByEmail(req repositories.GetByEmailRequest) (repositories.GetB
 		req.Email.Value(),
 	)
 	if err := row.StructScan(&model); err != nil {
-		return repositories.GetByEmailResponse{}, fmt.Errorf("[user_sqlx_mysql:GetByEmail] %w: %v", repositories.ErrUserNotFound, err)
+		return repositories.GetByEmailResponse{}, fmt.Errorf("[user_sqlx_mysql:GetByEmail] %w: (%v)", repositories.ErrUserNotFound, err)
 	}
 
 	response, err := model.Repository()
 	if err != nil {
-		return repositories.GetByEmailResponse{}, fmt.Errorf("[user_sqlx_mysql:GetByEmail] %w: %v", repositories.ErrConvertFromModel, err)
+		return repositories.GetByEmailResponse{}, fmt.Errorf("[user_sqlx_mysql:GetByEmail] %w: (%v)", repositories.ErrGettingUser, err)
 	}
 
 	return response, nil
@@ -89,7 +89,7 @@ func (u *User) GetByID(req repositories.GetByIDRequest) (res repositories.GetByI
 
 	user, err := model.Entity()
 	if err != nil {
-		return repositories.GetByIDResponse{}, fmt.Errorf("[user_sqlx_mysql:GetByID] %w: (%v)", repositories.ErrConvertFromModel, err)
+		return repositories.GetByIDResponse{}, fmt.Errorf("[user_sqlx_mysql:GetByID] %w: (%v)", repositories.ErrGettingUser, err)
 	}
 
 	res.User = user
@@ -99,8 +99,8 @@ func (u *User) GetByID(req repositories.GetByIDRequest) (res repositories.GetByI
 
 func (u *User) CountAll(req repositories.CountAllRequest) (repositories.CountAllResponse, error) {
 	q := `
-		SELECT COUNT(id)
-		FROM users`
+		SELECT COUNT(id) AS total
+		FROM user`
 
 	if req.Deleted {
 		q += " WHERE deleted_at IS NOT NULL"
@@ -111,7 +111,7 @@ func (u *User) CountAll(req repositories.CountAllRequest) (repositories.CountAll
 	var count int
 	row := u.db.QueryRowx(q)
 	if err := row.Scan(&count); err != nil {
-		return repositories.CountAllResponse{}, err
+		return repositories.CountAllResponse{}, fmt.Errorf("[user_sqlx_mysql:CountAll] %w: (%v)", repositories.ErrCountingUsers, err)
 	}
 
 	return repositories.CountAllResponse{Total: count}, nil
@@ -142,11 +142,11 @@ func (u *User) GetAll(req repositories.GetAllRequest) (res repositories.GetAllRe
 	for rows.Next() {
 		var model models.User
 		if err := rows.StructScan(&model); err != nil {
-			return repositories.GetAllResponse{}, err
+			return repositories.GetAllResponse{}, fmt.Errorf("[user_sqlx_mysql:GetAll] %w: (%v)", repositories.ErrGettingUsers, err)
 		}
 		user, err := model.Entity()
 		if err != nil {
-			return repositories.GetAllResponse{}, err
+			return repositories.GetAllResponse{}, fmt.Errorf("[user_sqlx_mysql:GetAll] %w: (%v)", repositories.ErrGettingUsers, err)
 		}
 
 		users = append(users, user)
