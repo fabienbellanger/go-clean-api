@@ -1,9 +1,7 @@
 package db
 
 import (
-	"errors"
 	"fmt"
-	"go-clean-api/pkg"
 	vo "go-clean-api/pkg/domain/value_objects"
 	"strings"
 	"time"
@@ -13,35 +11,6 @@ const (
 	// DefaultSlowThreshold represents the default slow threshold value
 	DefaultSlowThreshold time.Duration = 200 * time.Millisecond
 )
-
-// Config represents the MySQL database configuration
-type Config struct {
-	pkg.Config
-}
-
-// dsn returns the DSN if the configuration is OK or an error in other case
-func (c *Config) dsn() (dsn string, err error) {
-	if c.Database.Host == "" || c.Database.Port == 0 || c.Database.Username == "" || c.Database.Password == "" {
-		return dsn, errors.New("error in database configuration")
-	}
-
-	dsn = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=True",
-		c.Database.Username,
-		c.Database.Password,
-		c.Database.Host,
-		c.Database.Port,
-		c.Database.Database)
-	if c.Database.Charset != "" {
-		dsn += fmt.Sprintf("&charset=%s", c.Database.Charset)
-	}
-	if c.Database.Collation != "" {
-		dsn += fmt.Sprintf("&collation=%s", c.Database.Collation)
-	}
-	if c.Database.Location != "" {
-		dsn += fmt.Sprintf("&loc=%s", c.Database.Location)
-	}
-	return
-}
 
 // PaginateValues transforms page and limit into offset and limit.
 func PaginateValues(p, l int) (offset int, limit int) {
