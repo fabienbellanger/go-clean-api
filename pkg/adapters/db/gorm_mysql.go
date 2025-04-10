@@ -29,8 +29,7 @@ func NewGormMySQL(config *pkg.Config) (*GormMySQL, error) {
 	}
 
 	// GORM logger configuration
-	// TODO: Get from .env file
-	env := "development"
+	env := config.AppEnv
 	level := getGormLogLevel(config.Gorm.LogLevel, env)
 	output, err := getGormLogOutput(config.Gorm.LogOutput, config.Gorm.LogFileName, env)
 	if err != nil {
@@ -89,7 +88,6 @@ func (m *GormMySQL) Database(d string) {
 // getGormLogLevel returns the log level for GORM.
 // If APP_ENV is development, the default log level is info,
 // warn in other case.
-// TODO: Add test
 func getGormLogLevel(level, env string) logger.LogLevel {
 	switch level {
 	case "silent":
