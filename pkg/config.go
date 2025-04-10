@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"errors"
 	"fmt"
 	"runtime"
 	"time"
@@ -137,6 +138,66 @@ func NewConfigDatabase() (*ConfigDatabase, error) {
 		MaxOpenConns:    viper.GetInt("DB_MAX_OPEN_CONNS"),
 		ConnMaxLifetime: viper.GetDuration("DB_CONN_MAX_LIFETIME") * time.Hour,
 		ConnMaxIdleTime: viper.GetDuration("DB_CONN_MAX_IDLE_TIME") * time.Hour,
+	}, nil
+}
+
+// DSN returns the DSN if the configuration is OK or an error in other case
+func (c *ConfigDatabase) DSN() (dsn string, err error) {
+	if c.Host == "" || c.Port == 0 || c.Username == "" || c.Password == "" {
+		return dsn, errors.New("error in database configuration")
+	}
+
+	dsn = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=True",
+		c.Username,
+		c.Password,
+		c.Host,
+		c.Port,
+		c.Database)
+	if c.Charset != "" {
+		dsn += fmt.Sprintf("&charset=%s", c.Charset)
+	}
+	if c.Collation != "" {
+		dsn += fmt.Sprintf("&collation=%s", c.Collation)
+	}
+	if c.Location != "" {
+		dsn += fmt.Sprintf("&loc=%s", c.Location)
+	}
+	return
+}
+
+// ConfigGorm represents the configuration of gorm
+type ConfigGorm struct {
+	// Log level (silent | error | warn | info)
+	LogLevel string
+
+	// Log ouput (stdout | file)
+	LogOutput string
+
+	// Log file name
+	LogFileName string
+
+	// Slow threshold
+	SlowThreshold time.Duration
+}
+
+// NewConfigGorm creates a new ConfigGorm instance
+func NewConfigGorm() (*ConfigGorm, error) {
+	level := viper.GetString("GORM_LOG_LEVEL")
+	output := viper.GetString("GORM_LOG_OUTPUT")
+
+	if level != "info" && level != "warn" && level != "error" && level != "silent" {
+		return nil, fmt.Errorf("invalid gorm log level")
+	}
+
+	if output != "stdout" && output != "file" {
+		return nil, fmt.Errorf("invalid log outputs")
+	}
+
+	return &ConfigGorm{
+		LogLevel:      level,
+		LogOutput:     output,
+		LogFileName:   viper.GetString("GORM_LOG_FILE_NAME"),
+		SlowThreshold: viper.GetDuration("GORM_SLOW_THRESHOLD"),
 	}, nil
 }
 
@@ -297,6 +358,9 @@ type Config struct {
 	// Database configuration
 	Database ConfigDatabase
 
+	// Gorm configuration
+	Gorm ConfigGorm
+
 	// Log configuration
 	Log ConfigLog
 
@@ -334,6 +398,11 @@ func NewConfig(file string) (*Config, error) {
 		return nil, err
 	}
 
+	gormConfig, err := NewConfigGorm()
+	if err != nil {
+		return nil, err
+	}
+
 	serverConfig, err := NewConfigServer()
 	if err != nil {
 		return nil, err
@@ -344,6 +413,7 @@ func NewConfig(file string) (*Config, error) {
 		AppName:  viper.GetString("APP_NAME"),
 		Server:   *serverConfig,
 		Database: *databaseConfig,
+		Gorm:     *gormConfig,
 		Log:      *logConfig,
 		JWT:      *jwtConfig,
 		CORS:     *NewConfigCORS(),

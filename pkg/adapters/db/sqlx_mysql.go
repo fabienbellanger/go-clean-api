@@ -1,6 +1,8 @@
 package db
 
 import (
+	"go-clean-api/pkg"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 )
@@ -8,12 +10,12 @@ import (
 // MySQL is a struct that contains the database connection
 type MySQL struct {
 	DB     *sqlx.DB
-	config *Config
+	config *pkg.Config
 }
 
 // NewMySQL creates a new MySQL database connection
-func NewMySQL(config *Config) (*MySQL, error) {
-	dsn, err := config.dsn()
+func NewMySQL(config *pkg.Config) (*MySQL, error) {
+	dsn, err := config.Database.DSN()
 	if err != nil {
 		return nil, err
 	}
@@ -23,10 +25,10 @@ func NewMySQL(config *Config) (*MySQL, error) {
 		return nil, err
 	}
 
-	db.SetConnMaxIdleTime(config.ConfigDatabase.ConnMaxIdleTime)
-	db.SetConnMaxLifetime(config.ConnMaxLifetime)
-	db.SetMaxOpenConns(config.MaxOpenConns)
-	db.SetMaxIdleConns(config.MaxIdleConns)
+	db.SetConnMaxIdleTime(config.Database.ConnMaxIdleTime)
+	db.SetConnMaxLifetime(config.Database.ConnMaxLifetime)
+	db.SetMaxOpenConns(config.Database.MaxOpenConns)
+	db.SetMaxIdleConns(config.Database.MaxIdleConns)
 
 	return &MySQL{
 		DB:     db,
@@ -35,9 +37,9 @@ func NewMySQL(config *Config) (*MySQL, error) {
 }
 
 func (m *MySQL) DSN() (string, error) {
-	return m.config.dsn()
+	return m.config.Database.DSN()
 }
 
 func (m *MySQL) Database(d string) {
-	m.config.Database = d
+	m.config.Database.Database = d
 }

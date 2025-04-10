@@ -16,29 +16,29 @@ const (
 
 // Config represents the MySQL database configuration
 type Config struct {
-	pkg.ConfigDatabase
+	pkg.Config
 }
 
 // dsn returns the DSN if the configuration is OK or an error in other case
 func (c *Config) dsn() (dsn string, err error) {
-	if c.Host == "" || c.Port == 0 || c.Username == "" || c.Password == "" {
+	if c.Database.Host == "" || c.Database.Port == 0 || c.Database.Username == "" || c.Database.Password == "" {
 		return dsn, errors.New("error in database configuration")
 	}
 
 	dsn = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=True",
-		c.Username,
-		c.Password,
-		c.Host,
-		c.Port,
-		c.Database)
-	if c.Charset != "" {
-		dsn += fmt.Sprintf("&charset=%s", c.Charset)
+		c.Database.Username,
+		c.Database.Password,
+		c.Database.Host,
+		c.Database.Port,
+		c.Database.Database)
+	if c.Database.Charset != "" {
+		dsn += fmt.Sprintf("&charset=%s", c.Database.Charset)
 	}
-	if c.Collation != "" {
-		dsn += fmt.Sprintf("&collation=%s", c.Collation)
+	if c.Database.Collation != "" {
+		dsn += fmt.Sprintf("&collation=%s", c.Database.Collation)
 	}
-	if c.Location != "" {
-		dsn += fmt.Sprintf("&loc=%s", c.Location)
+	if c.Database.Location != "" {
+		dsn += fmt.Sprintf("&loc=%s", c.Database.Location)
 	}
 	return
 }

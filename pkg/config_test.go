@@ -394,3 +394,106 @@ func TestNewConfigServerWithCorrectCPUNumber(t *testing.T) {
 	assert.Equal(t, c.BasicAuthPassword, "")
 	assert.Equal(t, c.MaxCPU, 1)
 }
+
+func TestNewConfigGorm(t *testing.T) {
+	viper.Set("GORM_LOG_LEVEL", "info")
+	viper.Set("GORM_LOG_OUTPUT", "stdout")
+	viper.Set("GORM_LOG_FILE_NAME", "")
+	viper.Set("GORM_SLOW_THRESHOLD", "200ms")
+
+	c, err := NewConfigGorm()
+
+	assert.Nil(t, err)
+	assert.Equal(t, c.LogLevel, "info")
+	assert.Equal(t, c.LogOutput, "stdout")
+	assert.Equal(t, c.LogFileName, "")
+	assert.Equal(t, c.SlowThreshold, 200*time.Millisecond)
+}
+
+func TestNewConfigGormWithInvalidLevel(t *testing.T) {
+	viper.Set("GORM_LOG_LEVEL", "fatal")
+	viper.Set("GORM_LOG_OUTPUT", "stdout")
+	viper.Set("GORM_LOG_FILE_NAME", "")
+	viper.Set("GORM_SLOW_THRESHOLD", "200ms")
+
+	_, err := NewConfigGorm()
+
+	assert.NotNil(t, err)
+}
+
+func TestNewConfigGormWithInvalidOutput(t *testing.T) {
+	viper.Set("GORM_LOG_LEVEL", "info")
+	viper.Set("GORM_LOG_OUTPUT", "test")
+	viper.Set("GORM_LOG_FILE_NAME", "")
+	viper.Set("GORM_SLOW_THRESHOLD", "200ms")
+
+	_, err := NewConfigGorm()
+
+	assert.NotNil(t, err)
+}
+
+func TestConfigDatabaseDsn(t *testing.T) {
+	viper.Set("DB_DRIVER", "mysql")
+	viper.Set("DB_HOST", "localhost")
+	viper.Set("DB_USERNAME", "root")
+	viper.Set("DB_PASSWORD", "root")
+	viper.Set("DB_PORT", 3306)
+	viper.Set("DB_DATABASE", "test")
+	viper.Set("DB_CHARSET", "utf8mb4")
+	viper.Set("DB_COLLATION", "utf8mb4_general_ci")
+	viper.Set("DB_LOCATION", "UTC")
+	viper.Set("DB_MAX_IDLE_CONNS", 10)
+	viper.Set("DB_MAX_OPEN_CONNS", 100)
+	viper.Set("DB_CONN_MAX_LIFETIME", 1)
+	viper.Set("DB_CONN_MAX_IDLE_TIME", 1)
+
+	c, _ := NewConfigDatabase()
+	dns, err := c.DSN()
+
+	assert.Nil(t, err)
+	assert.Equal(t, dns, "root:root@tcp(localhost:3306)/test?parseTime=True&charset=utf8mb4&collation=utf8mb4_general_ci&loc=UTC")
+}
+
+func TestConfigDatabaseDsnInvalid(t *testing.T) {
+	viper.Set("DB_DRIVER", "mysql")
+	viper.Set("DB_HOST", "localhost")
+	viper.Set("DB_USERNAME", "")
+	viper.Set("DB_PASSWORD", "root")
+	viper.Set("DB_PORT", 3306)
+	viper.Set("DB_DATABASE", "test")
+	viper.Set("DB_CHARSET", "utf8mb4")
+	viper.Set("DB_COLLATION", "utf8mb4_general_ci")
+	viper.Set("DB_LOCATION", "UTC")
+	viper.Set("DB_MAX_IDLE_CONNS", 10)
+	viper.Set("DB_MAX_OPEN_CONNS", 100)
+	viper.Set("DB_CONN_MAX_LIFETIME", 1)
+	viper.Set("DB_CONN_MAX_IDLE_TIME", 1)
+
+	c, _ := NewConfigDatabase()
+	_, err := c.DSN()
+	assert.NotNil(t, err)
+
+	// Empty password
+	viper.Set("DB_USERNAME", "root")
+	viper.Set("DB_PASSWORD", "")
+
+	c, _ = NewConfigDatabase()
+	_, err = c.DSN()
+	assert.NotNil(t, err)
+
+	// Empty port
+	viper.Set("DB_PASSWORD", "root")
+	viper.Set("DB_PORT", 0)
+
+	c, _ = NewConfigDatabase()
+	_, err = c.DSN()
+	assert.NotNil(t, err)
+
+	// Empty host
+	viper.Set("DB_PORT", 3306)
+	viper.Set("DB_HOST", "")
+
+	c, _ = NewConfigDatabase()
+	_, err = c.DSN()
+	assert.NotNil(t, err)
+}

@@ -1,6 +1,7 @@
 package db
 
 import (
+	"go-clean-api/pkg"
 	"io"
 	"log"
 	"os"
@@ -14,25 +15,24 @@ import (
 // GormMySQL is a struct that contains the database connection using Gorm ORM
 type GormMySQL struct {
 	DB     *gorm.DB
-	config *Config
-	// SlowThreshold   time.Duration // Slow SQL threshold (Default: 200ms)
+	config *pkg.Config
 }
 
-func NewGormMySQL(config *Config) (*GormMySQL, error) {
-	dsn, err := config.dsn()
+func NewGormMySQL(config *pkg.Config) (*GormMySQL, error) {
+	dsn, err := config.Database.DSN()
 	if err != nil {
 		return nil, err
 	}
 
-	// if config.SlowThreshold == 0 {
-	// 	config.SlowThreshold = DefaultSlowThreshold
-	// }
+	if config.Gorm.SlowThreshold == 0 {
+		config.Gorm.SlowThreshold = DefaultSlowThreshold
+	}
 
 	// GORM logger configuration
 	// TODO: Get from .env file
 	env := "development"
-	level := getGormLogLevel("info", env)
-	output, err := getGormLogOutput("", "", env)
+	level := getGormLogLevel(config.Gorm.LogLevel, env)
+	output, err := getGormLogOutput(config.Gorm.LogOutput, config.Gorm.LogFileName, env)
 	if err != nil {
 		return nil, err
 	}
@@ -43,10 +43,10 @@ func NewGormMySQL(config *Config) (*GormMySQL, error) {
 	customLogger := logger.New(
 		log.New(output, "\r\n", log.LstdFlags), // io writer
 		logger.Config{
-			SlowThreshold:             DefaultSlowThreshold, // config.SlowThreshold, // Slow SQL threshold (Default: 200ms)
-			LogLevel:                  level,                // Log level (Silent, Error, Warn, Info) (Default: Warn)
-			IgnoreRecordNotFoundError: true,                 // Ignore ErrRecordNotFound error for logger (Default: false)
-			Colorful:                  true,                 // Disable color (Default: true)
+			SlowThreshold:             config.Gorm.SlowThreshold, // Slow SQL threshold (Default: 200ms)
+			LogLevel:                  level,                     // Log level (Silent, Error, Warn, Info) (Default: Warn)
+			IgnoreRecordNotFoundError: true,                      // Ignore ErrRecordNotFound error for logger (Default: false)
+			Colorful:                  true,                      // Disable color (Default: true)
 		},
 	)
 
@@ -67,10 +67,10 @@ func NewGormMySQL(config *Config) (*GormMySQL, error) {
 	if err != nil {
 		return nil, err
 	}
-	sqlDB.SetConnMaxIdleTime(config.ConnMaxIdleTime)
-	sqlDB.SetConnMaxLifetime(config.ConnMaxLifetime)
-	sqlDB.SetMaxOpenConns(config.MaxOpenConns)
-	sqlDB.SetMaxIdleConns(config.MaxIdleConns)
+	sqlDB.SetConnMaxIdleTime(config.Database.ConnMaxIdleTime)
+	sqlDB.SetConnMaxLifetime(config.Database.ConnMaxLifetime)
+	sqlDB.SetMaxOpenConns(config.Database.MaxOpenConns)
+	sqlDB.SetMaxIdleConns(config.Database.MaxIdleConns)
 
 	return &GormMySQL{
 		DB:     db,
@@ -79,11 +79,11 @@ func NewGormMySQL(config *Config) (*GormMySQL, error) {
 }
 
 func (m *GormMySQL) DSN() (string, error) {
-	return m.config.dsn()
+	return m.config.Database.DSN()
 }
 
 func (m *GormMySQL) Database(d string) {
-	m.config.Database = d
+	m.config.Database.Database = d
 }
 
 // getGormLogLevel returns the log level for GORM.
