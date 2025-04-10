@@ -6,6 +6,12 @@ import (
 	"go-clean-api/pkg"
 	values_objects "go-clean-api/pkg/domain/value_objects"
 	"strings"
+	"time"
+)
+
+const (
+	// DefaultSlowThreshold represents the default slow threshold value
+	DefaultSlowThreshold time.Duration = 200 * time.Millisecond
 )
 
 // Config represents the MySQL database configuration
@@ -53,10 +59,12 @@ func PaginateValues(p, l int) (offset int, limit int) {
 	return
 }
 
-// OrderValues returns the ORDER BY clause for a list of fields to sort.
-func OrderValues(list string, prefixes ...string) (s string) {
+// orderValues transforms list of fields to sort into a map.
+func orderValues(list string, prefixes ...string) []string {
+	r := make([]string, 0)
+
 	if len(list) <= 0 {
-		return
+		return r
 	}
 
 	prefix := ""
@@ -64,31 +72,28 @@ func OrderValues(list string, prefixes ...string) (s string) {
 		prefix = prefixes[0] + "."
 	}
 
-	i := 0
-	for _, sort := range strings.Split(list, ",") {
-		if len(sort) > 0 {
-			key := fmt.Sprintf("%s%s", prefix, sort[1:])
-
-			var ord string
-			if strings.HasPrefix(sort, "+") && len(sort[1:]) > 1 {
-				ord = " " + key + " ASC"
-			} else if strings.HasPrefix(sort, "-") && len(sort[1:]) > 1 {
-				ord = " " + key + " DESC"
-			}
-
-			if len(ord) > 0 {
-				if i > 0 {
-					s += ","
-				}
-				s += ord
-
-				i++
+	sorts := strings.Split(list, ",")
+	for _, s := range sorts {
+		if len(s) > 0 {
+			key := fmt.Sprintf("%s%s", prefix, s[1:])
+			if strings.HasPrefix(s, "+") && len(s[1:]) > 1 {
+				r = append(r, fmt.Sprintf("%s ASC", key))
+			} else if strings.HasPrefix(s, "-") && len(s[1:]) > 1 {
+				r = append(r, fmt.Sprintf("%s DESC", key))
 			}
 		}
 	}
 
+	return r
+}
+
+// OrderValues returns the ORDER BY clause for a list of fields to sort.
+func OrderValues(list string, prefixes ...string) (s string) {
+	values := orderValues(list, prefixes...)
+	s = strings.Join(values, ", ")
+
 	if len(s) > 0 {
-		s = " ORDER BY" + s
+		s = " ORDER BY " + s
 	}
 
 	return

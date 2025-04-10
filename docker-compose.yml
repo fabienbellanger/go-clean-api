@@ -1,0 +1,14 @@
+services:
+  server:
+    container_name: go-clean-api-server
+    # image: go-clean-api-server:latest
+    build: .
+    ports:
+      - 3003:3003
+    restart: on-failure
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge

@@ -100,7 +100,7 @@ func (u *User) GetByID(req repositories.GetByIDRequest) (res repositories.GetByI
 func (u *User) CountAll(req repositories.CountAllRequest) (repositories.CountAllResponse, error) {
 	q := `
 		SELECT COUNT(id) AS total
-		FROM user`
+		FROM users`
 
 	if req.Deleted {
 		q += " WHERE deleted_at IS NOT NULL"
