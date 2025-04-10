@@ -18,13 +18,13 @@ import (
 
 // ChiServer is a struct that represents a Chi server
 type ChiServer struct {
-	DB     *db.MySQL
+	DB     *db.SqlxMySQL
 	Logger logger.CustomLogger
 	Config pkg.Config
 }
 
 // NewChiServer creates a new ChiServer
-func NewChiServer(config pkg.Config, db *db.MySQL, l logger.CustomLogger) ChiServer {
+func NewChiServer(config pkg.Config, db *db.SqlxMySQL, l logger.CustomLogger) ChiServer {
 	return ChiServer{
 		DB:     db,
 		Logger: l,

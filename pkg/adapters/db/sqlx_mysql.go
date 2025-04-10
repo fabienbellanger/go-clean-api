@@ -7,14 +7,14 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-// MySQL is a struct that contains the database connection
-type MySQL struct {
+// SqlxMySQL is a struct that contains the database connection
+type SqlxMySQL struct {
 	DB     *sqlx.DB
 	config *pkg.Config
 }
 
-// NewMySQL creates a new MySQL database connection
-func NewMySQL(config *pkg.Config) (*MySQL, error) {
+// NewSqlxMySQL creates a new MySQL database connection
+func NewSqlxMySQL(config *pkg.Config) (*SqlxMySQL, error) {
 	dsn, err := config.Database.DSN()
 	if err != nil {
 		return nil, err
@@ -30,16 +30,16 @@ func NewMySQL(config *pkg.Config) (*MySQL, error) {
 	db.SetMaxOpenConns(config.Database.MaxOpenConns)
 	db.SetMaxIdleConns(config.Database.MaxIdleConns)
 
-	return &MySQL{
+	return &SqlxMySQL{
 		DB:     db,
 		config: config,
 	}, nil
 }
 
-func (m *MySQL) DSN() (string, error) {
+func (m *SqlxMySQL) DSN() (string, error) {
 	return m.config.Database.DSN()
 }
 
-func (m *MySQL) Database(d string) {
+func (m *SqlxMySQL) Database(d string) {
 	m.config.Database.Database = d
 }

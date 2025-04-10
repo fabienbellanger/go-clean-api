@@ -16,7 +16,7 @@ type User struct {
 }
 
 // NewUser creates a new UserMysqlRepository
-func NewUser(db *db.MySQL) *User {
+func NewUser(db *db.SqlxMySQL) *User {
 	return &User{db: db.DB}
 }
 
