@@ -3,7 +3,7 @@ package sqlx_mysql
 import (
 	"fmt"
 	"go-clean-api/pkg/adapters/db"
-	"go-clean-api/pkg/adapters/repositories/sqlx_mysql/models"
+	"go-clean-api/pkg/adapters/models"
 	"go-clean-api/pkg/domain/entities"
 	"go-clean-api/pkg/domain/repositories"
 
