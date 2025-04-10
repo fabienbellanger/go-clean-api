@@ -3,7 +3,7 @@ package entities
 import (
 	"errors"
 	"go-clean-api/pkg"
-	values_objects "go-clean-api/pkg/domain/value_objects"
+	vo "go-clean-api/pkg/domain/value_objects"
 	"testing"
 	"time"
 
@@ -33,7 +33,7 @@ func TestGenerateJWT(t *testing.T) {
 		{
 			name: "Invalid algo",
 			args: args{
-				userID:   values_objects.NewID(),
+				userID:   vo.NewID(),
 				lifetime: lifetime,
 				algo:     "",
 				secret:   "my-secret",
@@ -46,7 +46,7 @@ func TestGenerateJWT(t *testing.T) {
 		{
 			name: "Invalid algo",
 			args: args{
-				userID:   values_objects.NewID(),
+				userID:   vo.NewID(),
 				lifetime: lifetime,
 				algo:     "HS512",
 				secret:   "secret",
@@ -59,7 +59,7 @@ func TestGenerateJWT(t *testing.T) {
 		{
 			name: "Valid",
 			args: args{
-				userID:   values_objects.NewID(),
+				userID:   vo.NewID(),
 				lifetime: lifetime,
 				algo:     "HS512",
 				secret:   "my-secret",

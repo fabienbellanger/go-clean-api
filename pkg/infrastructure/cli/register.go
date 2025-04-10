@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"go-clean-api/pkg/adapters/repositories/sqlx_mysql"
 	"go-clean-api/pkg/domain/usecases"
-	values_objects "go-clean-api/pkg/domain/value_objects"
+	vo "go-clean-api/pkg/domain/value_objects"
 	"log"
 	"strings"
 
@@ -47,11 +47,11 @@ var userCmd = &cobra.Command{
 			log.Fatalln(err)
 		}
 
-		email, err := values_objects.NewEmail(strings.TrimSpace(userEmail))
+		email, err := vo.NewEmail(strings.TrimSpace(userEmail))
 		if err != nil {
 			log.Fatalln(err)
 		}
-		password, err := values_objects.NewPassword(strings.TrimSpace(userPassword))
+		password, err := vo.NewPassword(strings.TrimSpace(userPassword))
 		if err != nil {
 			log.Fatalln(err)
 		}

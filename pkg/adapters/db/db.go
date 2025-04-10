@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"go-clean-api/pkg"
-	values_objects "go-clean-api/pkg/domain/value_objects"
+	vo "go-clean-api/pkg/domain/value_objects"
 	"strings"
 	"time"
 )
@@ -50,8 +50,8 @@ func PaginateValues(p, l int) (offset int, limit int) {
 	}
 
 	limit = l
-	if limit > values_objects.PaginationMaxSize || limit < 1 {
-		limit = values_objects.PaginationMaxSize
+	if limit > vo.PaginationMaxSize || limit < 1 {
+		limit = vo.PaginationMaxSize
 	}
 
 	offset = (p - 1) * limit
