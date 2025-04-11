@@ -20,7 +20,6 @@ func NewUser(db *db.SqlxMySQL) *User {
 	return &User{db: db.DB}
 }
 
-// GetByEmail returns user ID and password from the email
 func (u *User) GetByEmail(req repositories.GetByEmailRequest) (repositories.GetByEmailResponse, error) {
 	var model models.GetByEmail
 	row := u.db.QueryRowx(`
@@ -108,7 +107,7 @@ func (u *User) CountAll(req repositories.CountAllRequest) (repositories.CountAll
 		q += " WHERE deleted_at IS NULL"
 	}
 
-	var count int
+	var count int64
 	row := u.db.QueryRowx(q)
 	if err := row.Scan(&count); err != nil {
 		return repositories.CountAllResponse{}, fmt.Errorf("[user_sqlx_mysql:CountAll] %w: (%v)", repositories.ErrCountingUsers, err)

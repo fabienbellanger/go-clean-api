@@ -28,8 +28,9 @@ func initConfig() (*pkg.Config, error) {
 }
 
 // initDatabase initializes database connection.
-func initDatabase(config *pkg.Config) (*db.SqlxMySQL, error) {
-	return db.NewSqlxMySQL(config)
+func initDatabase(config *pkg.Config) (db.DB, error) {
+	// return db.NewSqlxMySQL(config)
+	return db.NewGormMySQL(config)
 }
 
 func displayLogLevel(l string) aurora.Value {

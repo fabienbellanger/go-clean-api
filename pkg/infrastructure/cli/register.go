@@ -2,7 +2,8 @@ package cli
 
 import (
 	"fmt"
-	"go-clean-api/pkg/adapters/repositories/sqlx_mysql"
+	"go-clean-api/pkg/adapters/db"
+	"go-clean-api/pkg/adapters/repositories/gorm_mysql"
 	"go-clean-api/pkg/domain/usecases"
 	vo "go-clean-api/pkg/domain/value_objects"
 	"log"
@@ -42,7 +43,7 @@ var userCmd = &cobra.Command{
 			log.Fatalln(err)
 		}
 
-		db, err := initDatabase(config)
+		database, err := initDatabase(config)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -57,7 +58,16 @@ var userCmd = &cobra.Command{
 		}
 
 		// Call use case
-		userRepo := sqlx_mysql.NewUser(db)
+		// sqlxDB, ok := database.(*db.SqlxMySQL)
+		// if !ok {
+		// 	log.Fatalln("db is not of type *db.SqlxMySQL")
+		// }
+		// userRepo := gorm_mysql.NewUser(sqlxDB)
+		gormDB, ok := database.(*db.GormMySQL)
+		if !ok {
+			log.Fatalln("db is not of type *db.GormMySQL")
+		}
+		userRepo := gorm_mysql.NewUser(gormDB)
 		userUseCase := usecases.NewUser(userRepo, config.JWT)
 		res, errRes := userUseCase.Create(usecases.CreateUserRequest{
 			Email:     email,

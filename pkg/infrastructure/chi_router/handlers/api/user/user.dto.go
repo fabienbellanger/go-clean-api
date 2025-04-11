@@ -136,7 +136,7 @@ type GetAllResponse struct {
 	Data  []UserResponse `json:"data" xml:"data"`
 	Page  int            `json:"page" xml:"page"`
 	Size  int            `json:"size" xml:"size"`
-	Total int            `json:"total" xml:"total"`
+	Total int64          `json:"total" xml:"total"`
 }
 
 // TODO: Add tests

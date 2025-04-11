@@ -116,7 +116,7 @@ type CountAllRequest struct {
 
 // CountAllResponse is the data transfer object for the CountAll method response.
 type CountAllResponse struct {
-	Total int
+	Total int64
 }
 
 //

@@ -7,6 +7,11 @@ import (
 	"time"
 )
 
+type DB interface {
+	DSN() (string, error)
+	Database(string)
+}
+
 const (
 	// DefaultSlowThreshold represents the default slow threshold value
 	DefaultSlowThreshold time.Duration = 200 * time.Millisecond

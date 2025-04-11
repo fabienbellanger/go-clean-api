@@ -192,7 +192,7 @@ type GetAllUsersRequest struct {
 // GetAllUsersResponse is the data transfer object for the GetAll method response.
 type GetAllUsersResponse struct {
 	Data  []entities.User
-	Total int
+	Total int64
 }
 
 // GetAll returns all users (pagination).
