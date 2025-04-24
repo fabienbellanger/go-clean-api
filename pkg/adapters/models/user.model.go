@@ -1,28 +1,37 @@
 package models
 
 import (
+	"errors"
+	"fmt"
 	"go-clean-api/pkg/domain/entities"
 	"go-clean-api/pkg/domain/repositories"
 	vo "go-clean-api/pkg/domain/value_objects"
 )
 
-// GetByEmail is the data transfer object for the GetByEmail method request.
-type GetByEmail struct {
+var (
+	ErrIDFromString       = errors.New("error when a new ID from a string")
+	ErrPasswordFromString = errors.New("error when a new password from a string")
+	ErrEmailFromString    = errors.New("error when a new email from a string")
+	ErrParseDateTime      = errors.New("error when parsing date time")
+)
+
+// GetUserByEmail is the data transfer object for the GetUserByEmail method request.
+type GetUserByEmail struct {
 	ID       string `db:"id"`
 	Password string `db:"password"`
 }
 
 // ToRepository converts the model to repository response
 // TODO: Add tests
-func (u GetByEmail) Repository() (repositories.GetByEmailResponse, error) {
+func (u GetUserByEmail) Repository() (repositories.GetByEmailResponse, error) {
 	id, err := vo.NewIDFrom(u.ID)
 	if err != nil {
-		return repositories.GetByEmailResponse{}, err
+		return repositories.GetByEmailResponse{}, fmt.Errorf("[models:GetUserByEmail %w: %s]", ErrIDFromString, err)
 	}
 
 	password, err := vo.NewPassword(u.Password)
 	if err != nil {
-		return repositories.GetByEmailResponse{}, err
+		return repositories.GetByEmailResponse{}, fmt.Errorf("[models:GetUserByEmail %w: %s]", ErrPasswordFromString, err)
 	}
 	return repositories.GetByEmailResponse{
 		ID:       id,
@@ -44,30 +53,35 @@ type User struct {
 // Entity converts the user model to entity
 // TODO: Add tests
 func (u User) Entity() (user entities.User, err error) {
-	id, err := vo.NewIDFrom(u.ID)
-	if err != nil {
+	id, errID := vo.NewIDFrom(u.ID)
+	if errID != nil {
+		err = fmt.Errorf("[models:User:Entity %w: %s]", ErrIDFromString, errID)
 		return
 	}
 
-	email, err := vo.NewEmail(u.Email)
-	if err != nil {
+	email, errEmail := vo.NewEmail(u.Email)
+	if errEmail != nil {
+		err = fmt.Errorf("[models:User:Entity %w: %s]", ErrEmailFromString, errEmail)
 		return
 	}
 
-	createdAt, err := vo.ParseRFC3339(u.CreatedAt, nil)
-	if err != nil {
+	createdAt, errDateTime := vo.ParseRFC3339(u.CreatedAt, nil)
+	if errDateTime != nil {
+		err = fmt.Errorf("[models:User:Entity %w: %s]", errDateTime, errDateTime)
 		return
 	}
 
-	updatedAt, err := vo.ParseRFC3339(u.UpdatedAt, nil)
-	if err != nil {
+	updatedAt, errDateTime := vo.ParseRFC3339(u.UpdatedAt, nil)
+	if errDateTime != nil {
+		err = fmt.Errorf("[models:User:Entity %w: %s]", errDateTime, errDateTime)
 		return
 	}
 
 	var deletedAt *vo.Time
 	if u.DeletedAt != nil {
-		d, e := vo.ParseRFC3339(*u.DeletedAt, nil)
-		if e != nil {
+		d, errDateTime := vo.ParseRFC3339(*u.DeletedAt, nil)
+		if errDateTime != nil {
+			err = fmt.Errorf("[models:User:Entity %w: %s]", errDateTime, errDateTime)
 			return
 		}
 		deletedAt = &d
@@ -83,5 +97,5 @@ func (u User) Entity() (user entities.User, err error) {
 		DeletedAt: deletedAt,
 	}
 
-	return user, nil
+	return
 }

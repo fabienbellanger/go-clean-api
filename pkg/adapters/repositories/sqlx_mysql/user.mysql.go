@@ -21,7 +21,7 @@ func NewUser(db *db.SqlxMySQL) *User {
 }
 
 func (u *User) GetByEmail(req repositories.GetByEmailRequest) (repositories.GetByEmailResponse, error) {
-	var model models.GetByEmail
+	var model models.GetUserByEmail
 	row := u.db.QueryRowx(`
 		SELECT id, password
 		FROM users

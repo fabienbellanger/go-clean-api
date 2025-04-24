@@ -21,7 +21,7 @@ func NewUser(db *db.GormMySQL) *User {
 }
 
 func (u *User) GetByEmail(req repositories.GetByEmailRequest) (res repositories.GetByEmailResponse, err error) {
-	var model models.GetByEmail
+	var model models.GetUserByEmail
 	result := u.db.Raw(`
 		SELECT id, password
 		FROM users
