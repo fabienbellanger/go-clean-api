@@ -2,6 +2,7 @@ package user
 
 import (
 	"encoding/json"
+	"errors"
 	"go-clean-api/pkg/domain/usecases"
 	vo "go-clean-api/pkg/domain/value_objects"
 	"go-clean-api/pkg/infrastructure/chi_router/handlers"
@@ -56,7 +57,15 @@ func (u *Handler) token(w http.ResponseWriter, r *http.Request) error {
 
 	resUC, errUC := u.userUseCase.GetAccessToken(req)
 	if errUC != nil {
-		return errUC.SendError(w)
+		if errors.Is(errUC, usecases.ErrUserNotFound) || errors.Is(errUC, usecases.ErrInvalidPassword) {
+			return utils.Err401(w, errUC, "Unauthorized", nil)
+		} else if errors.Is(errUC, usecases.ErrAccessTokenCreation) {
+			return utils.Err500(w, errUC, "Internal server error", "Error during token generation")
+		} else if errors.Is(errUC, usecases.ErrDatabase) {
+			return utils.Err500(w, errUC, "Internal server error", "Error during authentication")
+		} else {
+			return utils.Err500(w, errUC, "Internal server error", "Unknown error")
+		}
 	}
 
 	res := GetAccessTokenResponse{
@@ -80,7 +89,7 @@ func (u *Handler) register(w http.ResponseWriter, r *http.Request) error {
 
 	resUC, errUC := u.userUseCase.Create(req)
 	if errUC != nil {
-		return errUC.SendError(w)
+		return utils.Err500(w, errUC, "Internal server error", "Error during user creation")
 	}
 
 	res := CreateResponse{
@@ -108,7 +117,13 @@ func (u *Handler) getByID(w http.ResponseWriter, r *http.Request) error {
 
 	resUC, errUC := u.userUseCase.GetByID(req)
 	if errUC != nil {
-		return errUC.SendError(w)
+		if errors.Is(errUC, usecases.ErrUserNotFound) {
+			return utils.Err404(w, errUC, "No user found", nil)
+		} else if errors.Is(errUC, usecases.ErrDatabase) {
+			return utils.Err500(w, errUC, "Internal server error", "Error when getting user")
+		} else {
+			return utils.Err500(w, errUC, "Internal server error", "Unknown error")
+		}
 	}
 
 	res := GetByIDResponse{}.FromEntity(resUC)
@@ -126,7 +141,7 @@ func (u *Handler) GetAll(w http.ResponseWriter, r *http.Request) error {
 		Deleted:    false,
 	})
 	if errUC != nil {
-		return errUC.SendError(w)
+		return utils.Err500(w, errUC, "Internal server error", "Error when getting users")
 	}
 
 	res := GetAllResponse{}.FromEntity(users, pagination)
@@ -144,7 +159,7 @@ func (u *Handler) GetAllDeleted(w http.ResponseWriter, r *http.Request) error {
 		Deleted:    true,
 	})
 	if errUC != nil {
-		return errUC.SendError(w)
+		return utils.Err500(w, errUC, "Internal server error", "Error when getting deleted users")
 	}
 
 	res := GetAllResponse{}.FromEntity(users, pagination)
@@ -165,7 +180,13 @@ func (u *Handler) delete(w http.ResponseWriter, r *http.Request) error {
 
 	_, errUC := u.userUseCase.Delete(req)
 	if errUC != nil {
-		return errUC.SendError(w)
+		if errors.Is(errUC, usecases.ErrUserNotFound) {
+			return utils.Err404(w, errUC, "No user found", nil)
+		} else if errors.Is(errUC, usecases.ErrDatabase) {
+			return utils.Err500(w, errUC, "Internal server error", "Error when deleting user")
+		} else {
+			return utils.Err500(w, errUC, "Internal server error", "Unknown error")
+		}
 	}
 
 	return utils.NoContent(w)
@@ -184,7 +205,13 @@ func (u *Handler) restore(w http.ResponseWriter, r *http.Request) error {
 
 	_, errUC := u.userUseCase.Restore(req)
 	if errUC != nil {
-		return errUC.SendError(w)
+		if errors.Is(errUC, usecases.ErrUserNotFound) {
+			return utils.Err404(w, errUC, "No user found", nil)
+		} else if errors.Is(errUC, usecases.ErrDatabase) {
+			return utils.Err500(w, errUC, "Internal server error", "Error when restoring user")
+		} else {
+			return utils.Err500(w, errUC, "Internal server error", "Unknown error")
+		}
 	}
 
 	return utils.NoContent(w)

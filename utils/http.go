@@ -69,7 +69,7 @@ func NewHTTPError(code int, message string, details any, err error) *HTTPError {
 }
 
 // Error returns the error message.
-func (e *HTTPError) Error() string {
+func (e HTTPError) Error() string {
 	return e.Err.Error()
 }
 

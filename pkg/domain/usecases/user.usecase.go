@@ -7,18 +7,26 @@ import (
 	"go-clean-api/pkg/domain/entities"
 	"go-clean-api/pkg/domain/repositories"
 	vo "go-clean-api/pkg/domain/value_objects"
-	"go-clean-api/utils"
 	"time"
+)
+
+var (
+	ErrDatabase            = errors.New("database error")
+	ErrUserNotFound        = errors.New("user not found")
+	ErrInvalidPassword     = errors.New("invalid password")
+	ErrHashPassword        = errors.New("error when hashing password")
+	ErrAccessTokenCreation = errors.New("error when creating access token")
+	ErrUserCreation        = errors.New("error when creating user")
 )
 
 // User is an interface for user use cases.
 type User interface {
-	GetAccessToken(GetAccessTokenRequest) (GetAccessTokenResponse, *utils.HTTPError)
-	Create(CreateUserRequest) (CreateUserResponse, *utils.HTTPError)
-	GetByID(GetUserByIDRequest) (GetUserByIDResponse, *utils.HTTPError)
-	GetAll(GetAllUsersRequest) (GetAllUsersResponse, *utils.HTTPError)
-	Delete(DeleteRestoreUserRequest) (DeleteRestoreUserResponse, *utils.HTTPError)
-	Restore(DeleteRestoreUserRequest) (DeleteRestoreUserResponse, *utils.HTTPError)
+	GetAccessToken(GetAccessTokenRequest) (GetAccessTokenResponse, error)
+	Create(CreateUserRequest) (CreateUserResponse, error)
+	GetByID(GetUserByIDRequest) (GetUserByIDResponse, error)
+	GetAll(GetAllUsersRequest) (GetAllUsersResponse, error)
+	Delete(DeleteRestoreUserRequest) (DeleteRestoreUserResponse, error)
+	Restore(DeleteRestoreUserRequest) (DeleteRestoreUserResponse, error)
 }
 
 type userUseCase struct {
@@ -47,45 +55,34 @@ type GetAccessTokenResponse struct {
 }
 
 // GetAccessToken returns an access token from user email and password.
-func (uc userUseCase) GetAccessToken(req GetAccessTokenRequest) (GetAccessTokenResponse, *utils.HTTPError) {
+func (uc userUseCase) GetAccessToken(req GetAccessTokenRequest) (res GetAccessTokenResponse, err error) {
 	// Get user ID and password from the email
-	userRepo, err := uc.userRepository.GetByEmail(repositories.GetByEmailRequest{Email: req.Email})
-	if err != nil {
-		var e *utils.HTTPError
-		if errors.Is(err, repositories.ErrUserNotFound) {
-			e = utils.NewHTTPError(
-				utils.StatusUnauthorized,
-				"Unauthorizedd",
-				nil,
-				fmt.Errorf("[user_uc:GetAccessToken] %v", err))
+	userRepo, errRepo := uc.userRepository.GetByEmail(repositories.GetByEmailRequest{Email: req.Email})
+	if errRepo != nil {
+		if errors.Is(errRepo, repositories.ErrUserNotFound) {
+			err = fmt.Errorf("[user_uc:GetAccessToken %w: %s]", ErrUserNotFound, errRepo)
 		} else {
-			e = utils.NewHTTPError(
-				utils.StatusInternalServerError,
-				"Internal server error",
-				"Error during authentication",
-				fmt.Errorf("[user_uc:GetAccessToken] %v", err))
+			err = fmt.Errorf("[user_uc:GetAccessToken %w: %s]", ErrDatabase, errRepo)
 		}
-		return GetAccessTokenResponse{}, e
+		return
 	}
 
 	// Compare the password
 	if userRepo.Password.Verify(req.Password.Value()) != nil {
-		return GetAccessTokenResponse{}, utils.NewHTTPError(utils.StatusUnauthorized, "Unauthorized", nil, nil)
+		err = fmt.Errorf("[user_uc:GetAccessToken %w]", ErrInvalidPassword)
+		return
 	}
 
 	// Generate a token
-	accessToken, err := entities.NewAccessToken(userRepo.ID, uc.jwtConfig)
-	if err != nil {
-		return GetAccessTokenResponse{}, utils.NewHTTPError(
-			utils.StatusInternalServerError,
-			"Internal server error",
-			"error during token generation",
-			fmt.Errorf("[user_uc:GetAccessToken] token generation error: %v", err))
+	accessToken, errToken := entities.NewAccessToken(userRepo.ID, uc.jwtConfig)
+	if errToken != nil {
+		err = fmt.Errorf("[user_uc:GetAccessToken %w: %s]", ErrAccessTokenCreation, errToken)
+		return
 	}
 
-	return GetAccessTokenResponse{
-		Token: accessToken,
-	}, nil
+	res.Token = accessToken
+
+	return
 }
 
 //
@@ -104,20 +101,22 @@ type CreateUserResponse struct {
 }
 
 // Create a new user.
-func (uc userUseCase) Create(req CreateUserRequest) (CreateUserResponse, *utils.HTTPError) {
+func (uc userUseCase) Create(req CreateUserRequest) (res CreateUserResponse, err error) {
 	// Hash password
-	hashedPassword, err := req.Password.HashUserPassword()
-	if err != nil {
-		return CreateUserResponse{}, utils.NewHTTPError(utils.StatusInternalServerError, "Error when hashing password", nil, err)
+	hashedPassword, errHash := req.Password.HashUserPassword()
+	if errHash != nil {
+		err = fmt.Errorf("[user_uc:Create %w: %s]", ErrHashPassword, errHash)
+		return
 	}
-	password, err := vo.NewPassword(hashedPassword)
-	if err != nil {
-		return CreateUserResponse{}, utils.NewHTTPError(utils.StatusInternalServerError, "Error when creating password", nil, err)
+	password, errPassword := vo.NewPassword(hashedPassword)
+	if errPassword != nil {
+		err = fmt.Errorf("[user_uc:Create %w: %s]", ErrInvalidPassword, errPassword)
+		return
 	}
 
 	// Add user to the database
 	now := vo.NewTime(time.Now(), nil)
-	respoRes, err := uc.userRepository.Create(repositories.CreateUserRequest{
+	respoRes, errRepo := uc.userRepository.Create(repositories.CreateUserRequest{
 		ID:        vo.NewID(),
 		Email:     req.Email,
 		Password:  password,
@@ -126,12 +125,9 @@ func (uc userUseCase) Create(req CreateUserRequest) (CreateUserResponse, *utils.
 		CreatedAt: now,
 		UpdatedAt: now,
 	})
-	if err != nil {
-		return CreateUserResponse{}, utils.NewHTTPError(
-			utils.StatusInternalServerError,
-			"Internal server error",
-			"Error during user creation",
-			fmt.Errorf("[user_uc:Create] %v", err))
+	if errRepo != nil {
+		err = fmt.Errorf("[user_uc:Create %w: %s]", ErrUserCreation, errRepo)
+		return
 	}
 
 	return CreateUserResponse{
@@ -154,24 +150,13 @@ type GetUserByIDResponse struct {
 }
 
 // GetByID returns a user by its ID.
-func (uc userUseCase) GetByID(req GetUserByIDRequest) (GetUserByIDResponse, *utils.HTTPError) {
+func (uc userUseCase) GetByID(req GetUserByIDRequest) (GetUserByIDResponse, error) {
 	res, err := uc.userRepository.GetByID(repositories.GetByIDRequest{ID: req.ID})
 	if err != nil {
-		var e *utils.HTTPError
 		if errors.Is(err, repositories.ErrUserNotFound) {
-			e = utils.NewHTTPError(
-				utils.StatusNotFound,
-				"No user found",
-				nil,
-				fmt.Errorf("[user_uc:GetByID] %v", err))
-		} else {
-			e = utils.NewHTTPError(
-				utils.StatusInternalServerError,
-				"Internal server error",
-				"Error when getting user",
-				fmt.Errorf("[user_uc:GetByID] %v", err))
+			return GetUserByIDResponse{}, fmt.Errorf("[user_uc:GetByID %w: %s]", ErrUserNotFound, err)
 		}
-		return GetUserByIDResponse{}, e
+		return GetUserByIDResponse{}, fmt.Errorf("[user_uc:GetByID %w: %s]", ErrDatabase, err)
 	}
 
 	return GetUserByIDResponse{
@@ -196,28 +181,22 @@ type GetAllUsersResponse struct {
 }
 
 // GetAll returns all users (pagination).
-func (uc userUseCase) GetAll(req GetAllUsersRequest) (GetAllUsersResponse, *utils.HTTPError) {
+func (uc userUseCase) GetAll(req GetAllUsersRequest) (res GetAllUsersResponse, err error) {
 	// Get total users
-	resTotal, err := uc.userRepository.CountAll(repositories.CountAllRequest{Deleted: req.Deleted})
-	if err != nil {
-		return GetAllUsersResponse{}, utils.NewHTTPError(
-			utils.StatusInternalServerError,
-			"Internal server error",
-			"Error when getting users",
-			fmt.Errorf("[user_uc:GetAll] %v", err))
+	resTotal, errTotal := uc.userRepository.CountAll(repositories.CountAllRequest{Deleted: req.Deleted})
+	if errTotal != nil {
+		err = fmt.Errorf("[user_uc:GetAll %w: %s]", ErrDatabase, errTotal)
+		return
 	}
 	total := resTotal.Total
 
 	users := []entities.User{}
 	if total > 0 {
 		// Get users
-		resUsers, err := uc.userRepository.GetAll(repositories.GetAllRequest{Pagination: req.Pagination, Deleted: req.Deleted})
-		if err != nil {
-			return GetAllUsersResponse{}, utils.NewHTTPError(
-				utils.StatusInternalServerError,
-				"Internal server error",
-				"Error when getting users",
-				fmt.Errorf("[user_uc:GetAll] %v", err))
+		resUsers, errUsers := uc.userRepository.GetAll(repositories.GetAllRequest{Pagination: req.Pagination, Deleted: req.Deleted})
+		if errUsers != nil {
+			err = fmt.Errorf("[user_uc:GetAll %w: %s]", ErrDatabase, errUsers)
+			return
 		}
 
 		users = resUsers.Users
@@ -242,48 +221,26 @@ type DeleteRestoreUserRequest struct {
 type DeleteRestoreUserResponse struct{}
 
 // Delete a user by its ID.
-func (uc userUseCase) Delete(req DeleteRestoreUserRequest) (DeleteRestoreUserResponse, *utils.HTTPError) {
+func (uc userUseCase) Delete(req DeleteRestoreUserRequest) (DeleteRestoreUserResponse, error) {
 	_, err := uc.userRepository.Delete(repositories.DeleteRestoreRequest{ID: req.ID})
 	if err != nil {
-		var e *utils.HTTPError
 		if errors.Is(err, repositories.ErrUserNotFound) {
-			e = utils.NewHTTPError(
-				utils.StatusNotFound,
-				"No user found",
-				nil,
-				fmt.Errorf("[user_uc:Delete] %v", err))
-		} else {
-			e = utils.NewHTTPError(
-				utils.StatusInternalServerError,
-				"Internal server error",
-				"Error when deleting user",
-				fmt.Errorf("[user_uc:Delete] %v", err))
+			return DeleteRestoreUserResponse{}, fmt.Errorf("[user_uc:Delete %w: %s]", ErrUserNotFound, err)
 		}
-		return DeleteRestoreUserResponse{}, e
+		return DeleteRestoreUserResponse{}, fmt.Errorf("[user_uc:Delete %w: %s]", ErrDatabase, err)
 	}
 
 	return DeleteRestoreUserResponse{}, nil
 }
 
 // Restore a user by its ID.
-func (uc userUseCase) Restore(req DeleteRestoreUserRequest) (DeleteRestoreUserResponse, *utils.HTTPError) {
+func (uc userUseCase) Restore(req DeleteRestoreUserRequest) (DeleteRestoreUserResponse, error) {
 	_, err := uc.userRepository.Restore(repositories.DeleteRestoreRequest{ID: req.ID})
 	if err != nil {
-		var e *utils.HTTPError
 		if errors.Is(err, repositories.ErrUserNotFound) {
-			e = utils.NewHTTPError(
-				utils.StatusNotFound,
-				"No user found",
-				nil,
-				fmt.Errorf("[user_uc:Restore] %v", err))
-		} else {
-			e = utils.NewHTTPError(
-				utils.StatusInternalServerError,
-				"Internal server error",
-				"Error when restoring user",
-				fmt.Errorf("[user_uc:Restore] %v", err))
+			return DeleteRestoreUserResponse{}, fmt.Errorf("[user_uc:Restore %w: %s]", ErrUserNotFound, err)
 		}
-		return DeleteRestoreUserResponse{}, e
+		return DeleteRestoreUserResponse{}, fmt.Errorf("[user_uc:Restore %w: %s]", ErrDatabase, err)
 	}
 
 	return DeleteRestoreUserResponse{}, nil

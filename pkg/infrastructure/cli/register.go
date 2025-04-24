@@ -76,7 +76,7 @@ var userCmd = &cobra.Command{
 			Firstname: strings.TrimSpace(userFirstname),
 		})
 		if errRes != nil {
-			fmt.Printf("\nError: %v (%v)\n", errRes.Message, errRes.Details)
+			fmt.Printf("\nError: %s\n", errRes)
 			return
 		}
 

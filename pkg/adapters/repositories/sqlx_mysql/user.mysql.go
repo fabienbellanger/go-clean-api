@@ -31,12 +31,12 @@ func (u *User) GetByEmail(req repositories.GetByEmailRequest) (repositories.GetB
 		req.Email.Value(),
 	)
 	if err := row.StructScan(&model); err != nil {
-		return repositories.GetByEmailResponse{}, fmt.Errorf("[user_sqlx_mysql:GetByEmail] %w: (%v)", repositories.ErrUserNotFound, err)
+		return repositories.GetByEmailResponse{}, fmt.Errorf("[user_sqlx_mysql:GetByEmail %w: %s]", repositories.ErrUserNotFound, err)
 	}
 
 	response, err := model.Repository()
 	if err != nil {
-		return repositories.GetByEmailResponse{}, fmt.Errorf("[user_sqlx_mysql:GetByEmail] %w: (%v)", repositories.ErrGettingUser, err)
+		return repositories.GetByEmailResponse{}, fmt.Errorf("[user_sqlx_mysql:GetByEmail %w: %s]", repositories.ErrGettingUser, err)
 	}
 
 	return response, nil
@@ -83,12 +83,12 @@ func (u *User) GetByID(req repositories.GetByIDRequest) (res repositories.GetByI
 		req.ID.String(),
 	)
 	if err = row.StructScan(&model); err != nil {
-		return repositories.GetByIDResponse{}, fmt.Errorf("[user_sqlx_mysql:GetByID] %w: (%v)", repositories.ErrUserNotFound, err)
+		return repositories.GetByIDResponse{}, fmt.Errorf("[user_sqlx_mysql:GetByID %w: %s]", repositories.ErrUserNotFound, err)
 	}
 
 	user, err := model.Entity()
 	if err != nil {
-		return repositories.GetByIDResponse{}, fmt.Errorf("[user_sqlx_mysql:GetByID] %w: (%v)", repositories.ErrGettingUser, err)
+		return repositories.GetByIDResponse{}, fmt.Errorf("[user_sqlx_mysql:GetByID %w: %s]", repositories.ErrGettingUser, err)
 	}
 
 	res.User = user
@@ -110,7 +110,7 @@ func (u *User) CountAll(req repositories.CountAllRequest) (repositories.CountAll
 	var count int64
 	row := u.db.QueryRowx(q)
 	if err := row.Scan(&count); err != nil {
-		return repositories.CountAllResponse{}, fmt.Errorf("[user_sqlx_mysql:CountAll] %w: (%v)", repositories.ErrCountingUsers, err)
+		return repositories.CountAllResponse{}, fmt.Errorf("[user_sqlx_mysql:CountAll %w: %s]", repositories.ErrCountingUsers, err)
 	}
 
 	return repositories.CountAllResponse{Total: count}, nil
@@ -141,11 +141,11 @@ func (u *User) GetAll(req repositories.GetAllRequest) (res repositories.GetAllRe
 	for rows.Next() {
 		var model models.User
 		if err := rows.StructScan(&model); err != nil {
-			return repositories.GetAllResponse{}, fmt.Errorf("[user_sqlx_mysql:GetAll] %w: (%v)", repositories.ErrGettingUsers, err)
+			return repositories.GetAllResponse{}, fmt.Errorf("[user_sqlx_mysql:GetAll %w: %s]", repositories.ErrGettingUsers, err)
 		}
 		user, err := model.Entity()
 		if err != nil {
-			return repositories.GetAllResponse{}, fmt.Errorf("[user_sqlx_mysql:GetAll] %w: (%v)", repositories.ErrGettingUsers, err)
+			return repositories.GetAllResponse{}, fmt.Errorf("[user_sqlx_mysql:GetAll %w: %s]", repositories.ErrGettingUsers, err)
 		}
 
 		users = append(users, user)
@@ -165,14 +165,14 @@ func (u *User) Delete(req repositories.DeleteRestoreRequest) (res repositories.D
 		req.ID.String(),
 	)
 	if err != nil {
-		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Delete] %w: (%v)", repositories.ErrDatabase, err)
+		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Delete %w: %s]", repositories.ErrDatabase, err)
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Delete] %w: (%v)", repositories.ErrDatabase, err)
+		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Delete %w: %s]", repositories.ErrDatabase, err)
 	}
 	if rowsAffected == 0 {
-		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Delete] %w: (%v)", repositories.ErrUserNotFound, err)
+		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Delete %w: %s]", repositories.ErrUserNotFound, err)
 	}
 
 	return
@@ -187,15 +187,15 @@ func (u *User) Restore(req repositories.DeleteRestoreRequest) (res repositories.
 		req.ID.String(),
 	)
 	if err != nil {
-		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Restore] %w: (%v)", repositories.ErrDatabase, err)
+		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Restore %w: %s]", repositories.ErrDatabase, err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Restore] %w: (%v)", repositories.ErrDatabase, err)
+		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Restore %w: %s]", repositories.ErrDatabase, err)
 	}
 	if rowsAffected == 0 {
-		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Restore] %w: (%v)", repositories.ErrUserNotFound, err)
+		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Restore %w: %s]", repositories.ErrUserNotFound, err)
 	}
 
 	return

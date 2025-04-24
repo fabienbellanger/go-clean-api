@@ -22,18 +22,22 @@ func NewUser(db *db.GormMySQL) *User {
 
 func (u *User) GetByEmail(req repositories.GetByEmailRequest) (res repositories.GetByEmailResponse, err error) {
 	var model models.GetByEmail
-	if result := u.db.Raw(`
+	result := u.db.Raw(`
 		SELECT id, password
 		FROM users
 		WHERE email = ?
 			AND deleted_at IS NULL
-		LIMIT 1`, req.Email.Value()).Scan(&model); result.Error != nil {
-		return res, fmt.Errorf("[user_gorm_mysql:GetByID] %w: (%v)", repositories.ErrUserNotFound, result.Error)
+		LIMIT 1`, req.Email.Value()).Scan(&model)
+	if result.Error != nil {
+		return res, fmt.Errorf("[user_gorm_mysql:GetByEmail %w: %s]", repositories.ErrUserNotFound, result.Error)
+	} else if result.RowsAffected == 0 {
+		return res, fmt.Errorf("[user_gorm_mysql:GetByEmail %w]", repositories.ErrUserNotFound)
 	}
+
 	res, err = model.Repository()
 
 	if err != nil {
-		return res, fmt.Errorf("[user_gorm_mysql:GetByEmail] %w: (%v)", repositories.ErrGettingUser, err)
+		return res, fmt.Errorf("[user_gorm_mysql:GetByEmail %w: %s]", repositories.ErrGettingUser, err)
 	}
 
 	return res, nil
@@ -47,12 +51,12 @@ func (u *User) GetByID(req repositories.GetByIDRequest) (res repositories.GetByI
 		WHERE id = ?
 			AND deleted_at IS NULL
 		LIMIT 1`, req.ID.Value()).Scan(&model); result.Error != nil {
-		return res, fmt.Errorf("[user_gorm_mysql:GetByID] %w: (%v)", repositories.ErrUserNotFound, result.Error)
+		return res, fmt.Errorf("[user_gorm_mysql:GetByID %w: %s]", repositories.ErrUserNotFound, result.Error)
 	}
 	user, err := model.Entity()
 
 	if err != nil {
-		return res, fmt.Errorf("[user_gorm_mysql:GetByID] %w: (%v)", repositories.ErrGettingUser, err)
+		return res, fmt.Errorf("[user_gorm_mysql:GetByID %w: %s]", repositories.ErrGettingUser, err)
 	}
 
 	res.User = user
@@ -74,7 +78,7 @@ func (u *User) CountAll(req repositories.CountAllRequest) (repositories.CountAll
 	var count int64
 	row := u.db.Raw(q)
 	if result := row.Scan(&count); result.Error != nil {
-		return repositories.CountAllResponse{}, fmt.Errorf("[user_gorm_mysql:CountAll] %w: (%v)", repositories.ErrCountingUsers, result.Error)
+		return repositories.CountAllResponse{}, fmt.Errorf("[user_gorm_mysql:CountAll %w: %s]", repositories.ErrCountingUsers, result.Error)
 	}
 
 	return repositories.CountAllResponse{Total: count}, nil
@@ -90,14 +94,14 @@ func (u *User) GetAll(req repositories.GetAllRequest) (res repositories.GetAllRe
 
 	var users []models.User
 	if result := q.Find(&users); result.Error != nil {
-		return res, fmt.Errorf("[user_gorm_mysql:GetAll] %w: (%v)", repositories.ErrGettingUsers, result.Error)
+		return res, fmt.Errorf("[user_gorm_mysql:GetAll %w: %s]", repositories.ErrGettingUsers, result.Error)
 	}
 
 	usersEntity := make([]entities.User, 0, len(users))
 	for _, user := range users {
 		userEntity, err := user.Entity()
 		if err != nil {
-			return res, fmt.Errorf("[user_gorm_mysql:GetAll] %w: (%v)", repositories.ErrGettingUsers, err)
+			return res, fmt.Errorf("[user_gorm_mysql:GetAll %w: %s]", repositories.ErrGettingUsers, err)
 		}
 		usersEntity = append(usersEntity, userEntity)
 	}
@@ -119,7 +123,7 @@ func (u *User) Create(req repositories.CreateUserRequest) (res repositories.Crea
 		req.UpdatedAt.SQL(),
 	)
 	if result.Error != nil {
-		return res, fmt.Errorf("[user_gorm_mysql:Create] %w: (%v)", repositories.ErrCreatingUser, result.Error)
+		return res, fmt.Errorf("[user_gorm_mysql:Create %w: %s]", repositories.ErrCreatingUser, result.Error)
 	}
 
 	return repositories.CreateUserResponse{
@@ -144,11 +148,11 @@ func (u *User) Delete(req repositories.DeleteRestoreRequest) (res repositories.D
 		req.ID.String(),
 	)
 	if result.Error != nil {
-		return res, fmt.Errorf("[user_sqlx_mysql:Delete] %w: (%v)", repositories.ErrDatabase, result.Error)
+		return res, fmt.Errorf("[user_sqlx_mysql:Delete %w: %s]", repositories.ErrDatabase, result.Error)
 	}
 
 	if result.RowsAffected == 0 {
-		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Delete] %w: (no rows affected)", repositories.ErrUserNotFound)
+		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Delete %w]", repositories.ErrUserNotFound)
 	}
 
 	return
@@ -163,11 +167,11 @@ func (u *User) Restore(req repositories.DeleteRestoreRequest) (res repositories.
 		req.ID.String(),
 	)
 	if result.Error != nil {
-		return res, fmt.Errorf("[user_sqlx_mysql:Restore] %w: (%v)", repositories.ErrDatabase, result.Error)
+		return res, fmt.Errorf("[user_sqlx_mysql:Restore %w: %s]", repositories.ErrDatabase, result.Error)
 	}
 
 	if result.RowsAffected == 0 {
-		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Restore] %w: (no rows affected)", repositories.ErrUserNotFound)
+		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Restore %w]", repositories.ErrUserNotFound)
 	}
 
 	return
