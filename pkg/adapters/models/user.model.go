@@ -1,18 +1,10 @@
 package models
 
 import (
-	"errors"
 	"fmt"
 	"go-clean-api/pkg/domain/entities"
 	"go-clean-api/pkg/domain/repositories"
 	vo "go-clean-api/pkg/domain/value_objects"
-)
-
-var (
-	ErrIDFromString       = errors.New("error when a new ID from a string")
-	ErrPasswordFromString = errors.New("error when a new password from a string")
-	ErrEmailFromString    = errors.New("error when a new email from a string")
-	ErrParseDateTime      = errors.New("error when parsing date time")
 )
 
 // GetUserByEmail is the data transfer object for the GetUserByEmail method request.
