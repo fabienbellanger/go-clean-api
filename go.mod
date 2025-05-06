@@ -4,7 +4,7 @@ go 1.24
 
 require (
 	github.com/fabienbellanger/goutils v1.0.20
-	github.com/fabienbellanger/xerr v0.1.0
+	github.com/fabienbellanger/xerr v0.2.0
 	github.com/go-chi/chi/v5 v5.2.1
 	github.com/go-chi/cors v1.2.1
 	github.com/go-chi/jwtauth/v5 v5.3.3

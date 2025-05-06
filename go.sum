@@ -10,8 +10,8 @@ github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 h1:NMZiJj8QnKe1LgsbDayM4UoHwbvw
 github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0/go.mod h1:ZXNYxsqcloTdSy/rNShjYzMhyjf0LaoftYK0p+A3h40=
 github.com/fabienbellanger/goutils v1.0.20 h1:ZhNlWck+yxejlVJlK6lOPAbc+MHb69brtmKdAFsRha8=
 github.com/fabienbellanger/goutils v1.0.20/go.mod h1:ntbzpVxrZP3GOFemkOLhEj07q3znkxipL+Ybm0+Xu40=
-github.com/fabienbellanger/xerr v0.1.0 h1:7zRE+JSWqnAX0Cj9gwZKsHrOikWBGRqj1pszMegg8bA=
-github.com/fabienbellanger/xerr v0.1.0/go.mod h1:GwUrq4nejPZPz0hJkrM0U+2YTrw0WVS6wbR1kieBtGI=
+github.com/fabienbellanger/xerr v0.2.0 h1:LVaNoV5xL0A/iKNCgMdevuaMiTriTMQ6mCntLgqlmiA=
+github.com/fabienbellanger/xerr v0.2.0/go.mod h1:GwUrq4nejPZPz0hJkrM0U+2YTrw0WVS6wbR1kieBtGI=
 github.com/frankban/quicktest v1.14.6 h1:7Xjx+VpznH+oBnejlPUj8oUpdxnVs4f8XU8WnHkI4W8=
 github.com/frankban/quicktest v1.14.6/go.mod h1:4ptaffx2x8+WTWXmUCuVU6aPUX1/Mz7zb5vbUoiM6w0=
 github.com/fsnotify/fsnotify v1.9.0 h1:2Ml+OJNzbYCTzsxtv8vKSFD9PbJjmhYF14k/jKC7S9k=
