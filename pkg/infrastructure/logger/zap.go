@@ -43,7 +43,9 @@ func NewZapLogger(config pkg.Config) (*ZapLogger, error) {
 		return nil, err
 	}
 
-	logger, err := cfg.Build()
+	logger, err := cfg.Build(
+		zap.AddCaller(),
+		zap.AddCallerSkip(1))
 	if err != nil {
 		return &ZapLogger{defaultLogger}, nil
 	}
