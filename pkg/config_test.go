@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"go-clean-api/utils"
 	"runtime"
 	"testing"
 	"time"
@@ -81,8 +82,9 @@ func TestNewConfigJWTWithInvalidAlgo(t *testing.T) {
 
 	_, err := NewConfigJWT()
 
-	assert.NotNil(t, err)
-	assert.Equal(t, err.Error(), "invalid JWT algorithm")
+	appErr, ok := err.(utils.AppErr)
+	assert.True(t, ok)
+	assert.Equal(t, appErr.Msg, "invalid JWT algorithm")
 }
 
 func TestNewConfigJWTWithEmptyHS512Secret(t *testing.T) {
@@ -94,8 +96,9 @@ func TestNewConfigJWTWithEmptyHS512Secret(t *testing.T) {
 
 	_, err := NewConfigJWT()
 
-	assert.NotNil(t, err)
-	assert.Equal(t, err.Error(), "missing JWT secret")
+	appErr, ok := err.(utils.AppErr)
+	assert.True(t, ok)
+	assert.Equal(t, appErr.Msg, "invalid JWT secret")
 }
 
 func TestNewConfigJWTWithEmptyES384KeyPaths(t *testing.T) {
@@ -108,16 +111,18 @@ func TestNewConfigJWTWithEmptyES384KeyPaths(t *testing.T) {
 
 	_, err := NewConfigJWT()
 
-	assert.NotNil(t, err)
-	assert.Equal(t, err.Error(), "missing JWT private or public key path")
+	appErr, ok := err.(utils.AppErr)
+	assert.True(t, ok)
+	assert.Equal(t, appErr.Msg, "missing JWT private or public key path")
 
 	// Public key path empty
 	viper.Set("JWT_PRIVATE_KEY_PATH", "/path/to/private.key")
 
 	_, err = NewConfigJWT()
 
-	assert.NotNil(t, err)
-	assert.Equal(t, err.Error(), "missing JWT private or public key path")
+	appErr1, ok := err.(utils.AppErr)
+	assert.True(t, ok)
+	assert.Equal(t, appErr1.Msg, "missing JWT private or public key path")
 
 	// Private key path empty
 	viper.Set("JWT_PRIVATE_KEY_PATH", "")
@@ -125,8 +130,9 @@ func TestNewConfigJWTWithEmptyES384KeyPaths(t *testing.T) {
 
 	_, err = NewConfigJWT()
 
-	assert.NotNil(t, err)
-	assert.Equal(t, err.Error(), "missing JWT private or public key path")
+	appErr2, ok := err.(utils.AppErr)
+	assert.True(t, ok)
+	assert.Equal(t, appErr2.Msg, "missing JWT private or public key path")
 }
 
 func TestNewConfigLogWithCorrectParameters(t *testing.T) {
