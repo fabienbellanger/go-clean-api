@@ -36,7 +36,12 @@ func NewAccessToken(id UserID, cfg pkg.ConfigJWT) (AccessToken, error) {
 	// Generate encoded token and send it as response
 	t, err := token.SignedString(key)
 	if err != nil {
-		return AccessToken{}, err
+		return AccessToken{}, utils.NewAppErr(
+			err,
+			"error when signing JWT token",
+			nil,
+			nil,
+		)
 	}
 	return AccessToken{Token: t, ExpiredAt: vo.NewTime(expiredAt, nil)}, nil
 }

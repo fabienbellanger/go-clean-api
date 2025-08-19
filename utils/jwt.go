@@ -50,7 +50,8 @@ func GetTokenAndKeyFromAlgo(algo, secret, keyPath string) (*jwt.Token, any, erro
 	var key any
 	var err error
 
-	if algo == "HS512" {
+	switch algo {
+	case "HS512":
 		if len(secret) < 8 {
 			return nil, nil, NewAppErr(
 				errors.New("secret must have at least 8 characters"),
@@ -63,14 +64,14 @@ func GetTokenAndKeyFromAlgo(algo, secret, keyPath string) (*jwt.Token, any, erro
 		token = jwt.New(jwt.SigningMethodHS512)
 
 		key = []byte(secret)
-	} else if algo == "ES384" {
+	case "ES384":
 		token = jwt.New(jwt.SigningMethodES384)
 
 		key, err = LoadECDSAKeyFromFile(keyPath, true)
 		if err != nil {
 			return nil, nil, NewAppErr(err, "error when loading an ECDSA private or public key from a file", nil, nil)
 		}
-	} else {
+	default:
 		return nil, nil, NewAppErr(
 			errors.New("unsupported JWT algo: must be HS512 or ES384"),
 			"unsupported JWT algo: must be HS512 or ES384",
@@ -87,14 +88,15 @@ func GetKeyFromAlgo(algo, secret, keyPath string) (any, error) {
 	var key any
 	var err error
 
-	if algo == jwt.SigningMethodHS512.Name {
+	switch algo {
+	case jwt.SigningMethodHS512.Name:
 		key = []byte(secret)
-	} else if algo == jwt.SigningMethodES384.Name {
+	case jwt.SigningMethodES384.Name:
 		key, err = LoadECDSAKeyFromFile(keyPath, false)
 		if err != nil {
 			return nil, NewAppErr(err, "error when loading an ECDSA private or public key from a file", nil, nil)
 		}
-	} else {
+	default:
 		return nil, NewAppErr(
 			errors.New("unsupported JWT algo: must be HS512 or ES384"),
 			"unsupported JWT algo: must be HS512 or ES384",

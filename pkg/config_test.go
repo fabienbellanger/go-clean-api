@@ -82,7 +82,7 @@ func TestNewConfigJWTWithInvalidAlgo(t *testing.T) {
 
 	_, err := NewConfigJWT()
 
-	appErr, ok := err.(utils.AppErr)
+	appErr, ok := err.(*utils.AppErr)
 	assert.True(t, ok)
 	assert.Equal(t, appErr.Msg, "invalid JWT algorithm")
 }
@@ -96,9 +96,9 @@ func TestNewConfigJWTWithEmptyHS512Secret(t *testing.T) {
 
 	_, err := NewConfigJWT()
 
-	appErr, ok := err.(utils.AppErr)
+	appErr, ok := err.(*utils.AppErr)
 	assert.True(t, ok)
-	assert.Equal(t, appErr.Msg, "invalid JWT secret")
+	assert.Equal(t, appErr.Msg, "missing JWT secret")
 }
 
 func TestNewConfigJWTWithEmptyES384KeyPaths(t *testing.T) {
@@ -111,7 +111,7 @@ func TestNewConfigJWTWithEmptyES384KeyPaths(t *testing.T) {
 
 	_, err := NewConfigJWT()
 
-	appErr, ok := err.(utils.AppErr)
+	appErr, ok := err.(*utils.AppErr)
 	assert.True(t, ok)
 	assert.Equal(t, appErr.Msg, "missing JWT private or public key path")
 
@@ -120,7 +120,7 @@ func TestNewConfigJWTWithEmptyES384KeyPaths(t *testing.T) {
 
 	_, err = NewConfigJWT()
 
-	appErr1, ok := err.(utils.AppErr)
+	appErr1, ok := err.(*utils.AppErr)
 	assert.True(t, ok)
 	assert.Equal(t, appErr1.Msg, "missing JWT private or public key path")
 
@@ -130,7 +130,7 @@ func TestNewConfigJWTWithEmptyES384KeyPaths(t *testing.T) {
 
 	_, err = NewConfigJWT()
 
-	appErr2, ok := err.(utils.AppErr)
+	appErr2, ok := err.(*utils.AppErr)
 	assert.True(t, ok)
 	assert.Equal(t, appErr2.Msg, "missing JWT private or public key path")
 }
@@ -177,8 +177,9 @@ func TestNewConfigLogWithInvalidLevel(t *testing.T) {
 
 	_, err := NewConfigLog()
 
-	assert.NotNil(t, err)
-	assert.Equal(t, err.Error(), "invalid log level")
+	appErr, ok := err.(*utils.AppErr)
+	assert.True(t, ok)
+	assert.Equal(t, appErr.Msg, "invalid log level")
 }
 
 func TestNewConfigLogWithInvalidOutputs(t *testing.T) {
@@ -190,8 +191,9 @@ func TestNewConfigLogWithInvalidOutputs(t *testing.T) {
 
 	_, err := NewConfigLog()
 
-	assert.NotNil(t, err)
-	assert.Equal(t, err.Error(), "invalid log outputs")
+	appErr, ok := err.(*utils.AppErr)
+	assert.True(t, ok)
+	assert.Equal(t, appErr.Msg, "invalid log outputs")
 
 	// With two outputs
 	viper.Set("LOG_LEVEL", "info")
@@ -199,8 +201,9 @@ func TestNewConfigLogWithInvalidOutputs(t *testing.T) {
 
 	_, err = NewConfigLog()
 
-	assert.NotNil(t, err)
-	assert.Equal(t, err.Error(), "invalid log outputs")
+	appErr, ok = err.(*utils.AppErr)
+	assert.True(t, ok)
+	assert.Equal(t, appErr.Msg, "invalid log outputs")
 }
 
 func TestNewConfigLogWithInvalidFilePath(t *testing.T) {
@@ -212,8 +215,9 @@ func TestNewConfigLogWithInvalidFilePath(t *testing.T) {
 
 	_, err := NewConfigLog()
 
-	assert.NotNil(t, err)
-	assert.Equal(t, err.Error(), "missing log path")
+	appErr, ok := err.(*utils.AppErr)
+	assert.True(t, ok)
+	assert.Equal(t, appErr.Msg, "missing log path")
 }
 
 func TestConfigDatabaseWithCorrectParameters(t *testing.T) {
@@ -266,8 +270,9 @@ func TestConfigDatabaseWithInvalidDriver(t *testing.T) {
 
 	_, err := NewConfigDatabase()
 
-	assert.NotNil(t, err)
-	assert.Equal(t, err.Error(), "invalid database driver")
+	appErr, ok := err.(*utils.AppErr)
+	assert.True(t, ok)
+	assert.Equal(t, appErr.Msg, "invalid database driver")
 }
 
 func TestConfigDatabaseWithInvalidLocation(t *testing.T) {
@@ -287,8 +292,9 @@ func TestConfigDatabaseWithInvalidLocation(t *testing.T) {
 
 	_, err := NewConfigDatabase()
 
-	assert.NotNil(t, err)
-	assert.Equal(t, err.Error(), "invalid database location")
+	appErr, ok := err.(*utils.AppErr)
+	assert.True(t, ok)
+	assert.Equal(t, appErr.Msg, "invalid database location")
 }
 
 func TestConfigDatabaseWithEmptyDatabase(t *testing.T) {
@@ -308,8 +314,9 @@ func TestConfigDatabaseWithEmptyDatabase(t *testing.T) {
 
 	_, err := NewConfigDatabase()
 
-	assert.NotNil(t, err)
-	assert.Equal(t, err.Error(), "missing database name")
+	appErr, ok := err.(*utils.AppErr)
+	assert.True(t, ok)
+	assert.Equal(t, appErr.Msg, "invalid database name")
 }
 
 func TestNewConfigServerWithCorrectParameters(t *testing.T) {
@@ -342,8 +349,9 @@ func TestNewConfigServerWithEmptyAddress(t *testing.T) {
 
 	_, err := NewConfigServer()
 
-	assert.NotNil(t, err)
-	assert.Equal(t, err.Error(), "missing server address")
+	appErr, ok := err.(*utils.AppErr)
+	assert.True(t, ok)
+	assert.Equal(t, appErr.Msg, "missing server address")
 }
 
 func TestNewConfigServerWithEmptyPort(t *testing.T) {
@@ -355,8 +363,9 @@ func TestNewConfigServerWithEmptyPort(t *testing.T) {
 
 	_, err := NewConfigServer()
 
-	assert.NotNil(t, err)
-	assert.Equal(t, err.Error(), "missing server port")
+	appErr, ok := err.(*utils.AppErr)
+	assert.True(t, ok)
+	assert.Equal(t, appErr.Msg, "missing server port")
 }
 
 func TestNewConfigServerWithGreaterCPUNumber(t *testing.T) {

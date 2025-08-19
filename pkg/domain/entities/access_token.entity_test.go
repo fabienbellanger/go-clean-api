@@ -4,6 +4,7 @@ import (
 	"errors"
 	"go-clean-api/pkg"
 	vo "go-clean-api/pkg/domain/value_objects"
+	"go-clean-api/utils"
 	"testing"
 	"time"
 
@@ -82,7 +83,14 @@ func TestGenerateJWT(t *testing.T) {
 				tt.args.userID,
 				cfg,
 			)
-			got := result{jwt, err}
+
+			appErr, ok := err.(*utils.AppErr)
+			var got result
+			if !ok {
+				got = result{jwt, err}
+			} else {
+				got = result{jwt, errors.New(appErr.Msg)}
+			}
 
 			if got.err != nil {
 				assert.Equal(t, got.jwt.Token, tt.wanted.jwt.Token)
