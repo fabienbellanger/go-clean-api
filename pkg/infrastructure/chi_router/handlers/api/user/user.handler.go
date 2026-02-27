@@ -3,11 +3,12 @@ package user
 import (
 	"encoding/json"
 	"errors"
+	domainerr "go-clean-api/pkg/domain/errors"
 	"go-clean-api/pkg/domain/usecases"
 	vo "go-clean-api/pkg/domain/value_objects"
 	"go-clean-api/pkg/infrastructure/chi_router/handlers"
+	"go-clean-api/pkg/infrastructure/chi_router/httputil"
 	"go-clean-api/pkg/infrastructure/logger"
-	"go-clean-api/utils"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -47,24 +48,24 @@ func (h *Handler) PrivateRoutes() {
 func (u *Handler) token(w http.ResponseWriter, r *http.Request) error {
 	var body GetAccessTokenRequest
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		return utils.Err400(w, err, "Error when decoding the body", nil)
+		return httputil.Err400(w, err, "Error when decoding the body", nil)
 	}
 
 	req, err := body.ToUseCase()
 	if err != nil {
-		return utils.Err400(w, err, "Invalid parameters", err)
+		return httputil.Err400(w, err, "Invalid parameters", err)
 	}
 
 	resUC, errUC := u.userUseCase.GetAccessToken(req)
 	if errUC != nil {
-		if errors.Is(errUC, usecases.ErrUserNotFound) || errors.Is(errUC, usecases.ErrInvalidPassword) {
-			return utils.Err401(w, errUC, "Unauthorized", nil)
+		if errors.Is(errUC, domainerr.ErrNotFound) || errors.Is(errUC, usecases.ErrInvalidPassword) {
+			return httputil.Err401(w, errUC, "Unauthorized", nil)
 		} else if errors.Is(errUC, usecases.ErrAccessTokenCreation) {
-			return utils.Err500(w, errUC, "Internal server error", "Error during token generation")
-		} else if errors.Is(errUC, usecases.ErrDatabase) {
-			return utils.Err500(w, errUC, "Internal server error", "Error during authentication")
+			return httputil.Err500(w, errUC, "Internal server error", "Error during token generation")
+		} else if errors.Is(errUC, domainerr.ErrDatabase) {
+			return httputil.Err500(w, errUC, "Internal server error", "Error during authentication")
 		} else {
-			return utils.Err500(w, errUC, "Internal server error", "Unknown error")
+			return httputil.Err500(w, errUC, "Internal server error", "Unknown error")
 		}
 	}
 
@@ -73,23 +74,23 @@ func (u *Handler) token(w http.ResponseWriter, r *http.Request) error {
 		AccessTokenExpiredAt: resUC.Token.ExpiredAt.RFC3339(),
 	}
 
-	return utils.JSON(w, res)
+	return httputil.JSON(w, res)
 }
 
 func (u *Handler) register(w http.ResponseWriter, r *http.Request) error {
 	var body CreateRequest
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		return utils.Err400(w, err, "Error when decoding the body", nil)
+		return httputil.Err400(w, err, "Error when decoding the body", nil)
 	}
 
 	req, err := body.ToUseCase()
 	if err != nil {
-		return utils.Err400(w, err, "Invalid parameters", err)
+		return httputil.Err400(w, err, "Invalid parameters", err)
 	}
 
 	resUC, errUC := u.userUseCase.Create(req)
 	if errUC != nil {
-		return utils.Err500(w, errUC, "Internal server error", "Error during user creation")
+		return httputil.Err500(w, errUC, "Internal server error", "Error during user creation")
 	}
 
 	res := CreateResponse{
@@ -101,34 +102,34 @@ func (u *Handler) register(w http.ResponseWriter, r *http.Request) error {
 		UpdatedAt: resUC.UpdatedAt.RFC3339(),
 	}
 
-	return utils.Created(w, res)
+	return httputil.Created(w, res)
 }
 
 func (u *Handler) getByID(w http.ResponseWriter, r *http.Request) error {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		return utils.Err400(w, nil, "ID is required", nil)
+		return httputil.Err400(w, nil, "ID is required", nil)
 	}
 
 	req, err := GetByIDRequest{ID: id}.ToUseCase()
 	if err != nil {
-		return utils.Err400(w, err, "Invalid parameters", err)
+		return httputil.Err400(w, err, "Invalid parameters", err)
 	}
 
 	resUC, errUC := u.userUseCase.GetByID(req)
 	if errUC != nil {
-		if errors.Is(errUC, usecases.ErrUserNotFound) {
-			return utils.Err404(w, errUC, "No user found", nil)
-		} else if errors.Is(errUC, usecases.ErrDatabase) {
-			return utils.Err500(w, errUC, "Internal server error", "Error when getting user")
+		if errors.Is(errUC, domainerr.ErrNotFound) {
+			return httputil.Err404(w, errUC, "No user found", nil)
+		} else if errors.Is(errUC, domainerr.ErrDatabase) {
+			return httputil.Err500(w, errUC, "Internal server error", "Error when getting user")
 		} else {
-			return utils.Err500(w, errUC, "Internal server error", "Unknown error")
+			return httputil.Err500(w, errUC, "Internal server error", "Unknown error")
 		}
 	}
 
 	res := GetByIDResponse{}.FromEntity(resUC)
 
-	return utils.JSON(w, res)
+	return httputil.JSON(w, res)
 }
 
 func (u *Handler) GetAll(w http.ResponseWriter, r *http.Request) error {
@@ -141,12 +142,12 @@ func (u *Handler) GetAll(w http.ResponseWriter, r *http.Request) error {
 		Deleted:    false,
 	})
 	if errUC != nil {
-		return utils.Err500(w, errUC, "Internal server error", "Error when getting users")
+		return httputil.Err500(w, errUC, "Internal server error", "Error when getting users")
 	}
 
 	res := GetAllResponse{}.FromEntity(users, pagination)
 
-	return utils.JSON(w, res)
+	return httputil.JSON(w, res)
 }
 
 func (u *Handler) GetAllDeleted(w http.ResponseWriter, r *http.Request) error {
@@ -159,60 +160,60 @@ func (u *Handler) GetAllDeleted(w http.ResponseWriter, r *http.Request) error {
 		Deleted:    true,
 	})
 	if errUC != nil {
-		return utils.Err500(w, errUC, "Internal server error", "Error when getting deleted users")
+		return httputil.Err500(w, errUC, "Internal server error", "Error when getting deleted users")
 	}
 
 	res := GetAllResponse{}.FromEntity(users, pagination)
 
-	return utils.JSON(w, res)
+	return httputil.JSON(w, res)
 }
 
 func (u *Handler) delete(w http.ResponseWriter, r *http.Request) error {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		return utils.Err400(w, nil, "ID is required", nil)
+		return httputil.Err400(w, nil, "ID is required", nil)
 	}
 
 	req, err := DeleteRestoreRequest{ID: id}.ToUseCase()
 	if err != nil {
-		return utils.Err400(w, err, "Invalid parameters", err)
+		return httputil.Err400(w, err, "Invalid parameters", err)
 	}
 
 	_, errUC := u.userUseCase.Delete(req)
 	if errUC != nil {
-		if errors.Is(errUC, usecases.ErrUserNotFound) {
-			return utils.Err404(w, errUC, "No user found", nil)
-		} else if errors.Is(errUC, usecases.ErrDatabase) {
-			return utils.Err500(w, errUC, "Internal server error", "Error when deleting user")
+		if errors.Is(errUC, domainerr.ErrNotFound) {
+			return httputil.Err404(w, errUC, "No user found", nil)
+		} else if errors.Is(errUC, domainerr.ErrDatabase) {
+			return httputil.Err500(w, errUC, "Internal server error", "Error when deleting user")
 		} else {
-			return utils.Err500(w, errUC, "Internal server error", "Unknown error")
+			return httputil.Err500(w, errUC, "Internal server error", "Unknown error")
 		}
 	}
 
-	return utils.NoContent(w)
+	return httputil.NoContent(w)
 }
 
 func (u *Handler) restore(w http.ResponseWriter, r *http.Request) error {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		return utils.Err400(w, nil, "ID is required", nil)
+		return httputil.Err400(w, nil, "ID is required", nil)
 	}
 
 	req, err := DeleteRestoreRequest{ID: id}.ToUseCase()
 	if err != nil {
-		return utils.Err400(w, err, "Invalid parameters", err)
+		return httputil.Err400(w, err, "Invalid parameters", err)
 	}
 
 	_, errUC := u.userUseCase.Restore(req)
 	if errUC != nil {
-		if errors.Is(errUC, usecases.ErrUserNotFound) {
-			return utils.Err404(w, errUC, "No user found", nil)
-		} else if errors.Is(errUC, usecases.ErrDatabase) {
-			return utils.Err500(w, errUC, "Internal server error", "Error when restoring user")
+		if errors.Is(errUC, domainerr.ErrNotFound) {
+			return httputil.Err404(w, errUC, "No user found", nil)
+		} else if errors.Is(errUC, domainerr.ErrDatabase) {
+			return httputil.Err500(w, errUC, "Internal server error", "Error when restoring user")
 		} else {
-			return utils.Err500(w, errUC, "Internal server error", "Unknown error")
+			return httputil.Err500(w, errUC, "Internal server error", "Unknown error")
 		}
 	}
 
-	return utils.NoContent(w)
+	return httputil.NoContent(w)
 }

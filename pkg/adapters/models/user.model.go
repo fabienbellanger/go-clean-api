@@ -59,13 +59,13 @@ func (u User) Entity() (user entities.User, err error) {
 
 	createdAt, errDateTime := vo.ParseRFC3339(u.CreatedAt, nil)
 	if errDateTime != nil {
-		err = fmt.Errorf("[models:User:Entity %w: %s]", errDateTime, errDateTime)
+		err = fmt.Errorf("[models:User:Entity %w: %s]", ErrParseDateTime, errDateTime)
 		return
 	}
 
 	updatedAt, errDateTime := vo.ParseRFC3339(u.UpdatedAt, nil)
 	if errDateTime != nil {
-		err = fmt.Errorf("[models:User:Entity %w: %s]", errDateTime, errDateTime)
+		err = fmt.Errorf("[models:User:Entity %w: %s]", ErrParseDateTime, errDateTime)
 		return
 	}
 
@@ -73,7 +73,7 @@ func (u User) Entity() (user entities.User, err error) {
 	if u.DeletedAt != nil {
 		d, errDateTime := vo.ParseRFC3339(*u.DeletedAt, nil)
 		if errDateTime != nil {
-			err = fmt.Errorf("[models:User:Entity %w: %s]", errDateTime, errDateTime)
+			err = fmt.Errorf("[models:User:Entity %w: %s]", ErrParseDateTime, errDateTime)
 			return
 		}
 		deletedAt = &d

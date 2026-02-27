@@ -6,6 +6,7 @@ import (
 	"go-clean-api/pkg/adapters/repositories/gorm_mysql"
 	"go-clean-api/pkg/domain/usecases"
 	vo "go-clean-api/pkg/domain/value_objects"
+	"go-clean-api/pkg/infrastructure/auth"
 	"log"
 	"strings"
 
@@ -58,17 +59,13 @@ var userCmd = &cobra.Command{
 		}
 
 		// Call use case
-		// sqlxDB, ok := database.(*db.SqlxMySQL)
-		// if !ok {
-		// 	log.Fatalln("db is not of type *db.SqlxMySQL")
-		// }
-		// userRepo := gorm_mysql.NewUser(sqlxDB)
 		gormDB, ok := database.(*db.GormMySQL)
 		if !ok {
 			log.Fatalln("db is not of type *db.GormMySQL")
 		}
 		userRepo := gorm_mysql.NewUser(gormDB)
-		userUseCase := usecases.NewUser(userRepo, config.JWT)
+		tokenGen := auth.NewJWTTokenGenerator(config.JWT)
+		userUseCase := usecases.NewUser(userRepo, tokenGen)
 		res, errRes := userUseCase.Create(usecases.CreateUserRequest{
 			Email:     email,
 			Password:  password,

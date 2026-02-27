@@ -1,7 +1,7 @@
 package values_objects
 
 import (
-	"go-clean-api/utils"
+	"go-clean-api/pkg/domain/validation"
 )
 
 // Email represents an email value object
@@ -31,6 +31,6 @@ func NewEmail(value string) (Email, error) {
 }
 
 // Validate checks if a struct is valid and returns an array of errors
-func (e *Email) Validate() utils.ValidatorErrors {
-	return utils.ValidateVar(e.value, "email", "required,email")
+func (e *Email) Validate() validation.ValidatorErrors {
+	return validation.ValidateVar(e.value, "email", "required,email")
 }

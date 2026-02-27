@@ -2,7 +2,7 @@ package pkg
 
 import (
 	"fmt"
-	"go-clean-api/utils"
+	"go-clean-api/pkg/apperr"
 	"runtime"
 	"time"
 
@@ -41,11 +41,11 @@ func NewConfigServer() (*ConfigServer, error) {
 	maxCPU := viper.GetInt("SERVER_MAX_CPU")
 
 	if addr == "" {
-		return nil, utils.NewAppErr(fmt.Errorf("error in configuration"), "missing server address", nil, nil)
+		return nil, apperr.NewAppErr(fmt.Errorf("error in configuration"), "missing server address", nil, nil)
 	}
 
 	if port == 0 {
-		return nil, utils.NewAppErr(fmt.Errorf("error in configuration"), "missing server port", nil, nil)
+		return nil, apperr.NewAppErr(fmt.Errorf("error in configuration"), "missing server port", nil, nil)
 	}
 
 	defaultCPU := runtime.NumCPU()
@@ -113,15 +113,15 @@ func NewConfigDatabase() (*ConfigDatabase, error) {
 	database := viper.GetString("DB_DATABASE")
 
 	if driver != "mysql" {
-		return nil, utils.NewAppErr(fmt.Errorf("error in configuration"), "invalid database driver", nil, nil)
+		return nil, apperr.NewAppErr(fmt.Errorf("error in configuration"), "invalid database driver", nil, nil)
 	}
 
 	if location != "UTC" && location != "Local" {
-		return nil, utils.NewAppErr(fmt.Errorf("error in configuration"), "invalid database location", nil, nil)
+		return nil, apperr.NewAppErr(fmt.Errorf("error in configuration"), "invalid database location", nil, nil)
 	}
 
 	if database == "" {
-		return nil, utils.NewAppErr(fmt.Errorf("error in configuration"), "invalid database name", nil, nil)
+		return nil, apperr.NewAppErr(fmt.Errorf("error in configuration"), "invalid database name", nil, nil)
 	}
 
 	return &ConfigDatabase{
@@ -144,7 +144,7 @@ func NewConfigDatabase() (*ConfigDatabase, error) {
 // DSN returns the DSN if the configuration is OK or an error in other case
 func (c *ConfigDatabase) DSN() (dsn string, err error) {
 	if c.Host == "" || c.Port == 0 || c.Username == "" || c.Password == "" {
-		return dsn, utils.NewAppErr(fmt.Errorf("error in configuration"), "invalid database configuration", nil, nil)
+		return dsn, apperr.NewAppErr(fmt.Errorf("error in configuration"), "invalid database configuration", nil, nil)
 	}
 
 	dsn = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=True",
@@ -186,11 +186,11 @@ func NewConfigGorm() (*ConfigGorm, error) {
 	output := viper.GetString("GORM_LOG_OUTPUT")
 
 	if level != "info" && level != "warn" && level != "error" && level != "silent" {
-		return nil, utils.NewAppErr(fmt.Errorf("error in configuration"), "invalid gorm log level", nil, nil)
+		return nil, apperr.NewAppErr(fmt.Errorf("error in configuration"), "invalid gorm log level", nil, nil)
 	}
 
 	if output != "stdout" && output != "file" {
-		return nil, utils.NewAppErr(fmt.Errorf("error in configuration"), "invalid log outputs", nil, nil)
+		return nil, apperr.NewAppErr(fmt.Errorf("error in configuration"), "invalid log outputs", nil, nil)
 	}
 
 	return &ConfigGorm{
@@ -223,17 +223,17 @@ func NewConfigLog() (*ConfigLog, error) {
 	path := viper.GetString("LOG_PATH")
 
 	if level != "debug" && level != "info" && level != "warn" && level != "error" && level != "fatal" && level != "panic" {
-		return nil, utils.NewAppErr(fmt.Errorf("error in configuration"), "invalid log level", nil, nil)
+		return nil, apperr.NewAppErr(fmt.Errorf("error in configuration"), "invalid log level", nil, nil)
 	}
 
 	for _, output := range outputs {
 		if output != "stdout" && output != "file" {
-			return nil, utils.NewAppErr(fmt.Errorf("error in configuration"), "invalid log outputs", nil, nil)
+			return nil, apperr.NewAppErr(fmt.Errorf("error in configuration"), "invalid log outputs", nil, nil)
 		}
 	}
 
 	if goutils.StringInSlice("file", outputs) && path == "" {
-		return nil, utils.NewAppErr(fmt.Errorf("error in configuration"), "missing log path", nil, nil)
+		return nil, apperr.NewAppErr(fmt.Errorf("error in configuration"), "missing log path", nil, nil)
 	}
 
 	return &ConfigLog{
@@ -270,15 +270,15 @@ func NewConfigJWT() (*ConfigJWT, error) {
 	publicKeyPath := viper.GetString("JWT_PUBLIC_KEY_PATH")
 
 	if algo != "HS512" && algo != "ES384" {
-		return nil, utils.NewAppErr(fmt.Errorf("error in configuration"), "invalid JWT algorithm", nil, nil)
+		return nil, apperr.NewAppErr(fmt.Errorf("error in configuration"), "invalid JWT algorithm", nil, nil)
 	}
 
 	if algo == "HS512" && secret == "" {
-		return nil, utils.NewAppErr(fmt.Errorf("error in configuration"), "missing JWT secret", nil, nil)
+		return nil, apperr.NewAppErr(fmt.Errorf("error in configuration"), "missing JWT secret", nil, nil)
 	}
 
 	if algo == "ES384" && (privateKeyPath == "" || publicKeyPath == "") {
-		return nil, utils.NewAppErr(fmt.Errorf("error in configuration"), "missing JWT private or public key path", nil, nil)
+		return nil, apperr.NewAppErr(fmt.Errorf("error in configuration"), "missing JWT private or public key path", nil, nil)
 	}
 
 	return &ConfigJWT{
@@ -380,32 +380,32 @@ func NewConfig(file string) (*Config, error) {
 	viper.SetConfigFile(file)
 	err := viper.ReadInConfig()
 	if err != nil {
-		return nil, utils.NewAppErr(err, "error when reading .env file", nil, nil)
+		return nil, apperr.NewAppErr(err, "error when reading .env file", nil, nil)
 	}
 
 	jwtConfig, err := NewConfigJWT()
 	if err != nil {
-		return nil, utils.NewAppErr(err, "error in JWT configuration", nil, nil)
+		return nil, apperr.NewAppErr(err, "error in JWT configuration", nil, nil)
 	}
 
 	logConfig, err := NewConfigLog()
 	if err != nil {
-		return nil, utils.NewAppErr(err, "error in log configuration", nil, nil)
+		return nil, apperr.NewAppErr(err, "error in log configuration", nil, nil)
 	}
 
 	databaseConfig, err := NewConfigDatabase()
 	if err != nil {
-		return nil, utils.NewAppErr(err, "error in database configuration", nil, nil)
+		return nil, apperr.NewAppErr(err, "error in database configuration", nil, nil)
 	}
 
 	gormConfig, err := NewConfigGorm()
 	if err != nil {
-		return nil, utils.NewAppErr(err, "errorin GORM configuration", nil, nil)
+		return nil, apperr.NewAppErr(err, "errorin GORM configuration", nil, nil)
 	}
 
 	serverConfig, err := NewConfigServer()
 	if err != nil {
-		return nil, utils.NewAppErr(err, "error in server configuration", nil, nil)
+		return nil, apperr.NewAppErr(err, "error in server configuration", nil, nil)
 	}
 
 	return &Config{

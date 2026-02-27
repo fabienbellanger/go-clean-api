@@ -2,7 +2,7 @@ package web
 
 import (
 	"fmt"
-	"go-clean-api/utils"
+	"go-clean-api/pkg/infrastructure/chi_router/httputil"
 	"html/template"
 	"net/http"
 
@@ -20,11 +20,11 @@ func HealthCheck(w http.ResponseWriter, r *http.Request) error {
 func GetAPIv1Doc(w http.ResponseWriter, r *http.Request) error {
 	tmpl, err := template.ParseFiles("./templates/doc_api_v1.gohtml")
 	if err != nil {
-		return utils.Err500(w, err, "Error when parsing HTML template", nil)
+		return httputil.Err500(w, err, "Error when parsing HTML template", nil)
 	}
 
 	if err := tmpl.Execute(w, nil); err != nil {
-		return utils.Err500(w, err, "Error when executing HTML template", nil)
+		return httputil.Err500(w, err, "Error when executing HTML template", nil)
 	}
 
 	return nil

@@ -7,12 +7,6 @@ import (
 )
 
 var (
-	// ErrUserNotFound is the error returned when a user is not found.
-	ErrUserNotFound = errors.New("user not found")
-
-	// ErrDatabase is the error returned when a database error occurs.
-	ErrDatabase = errors.New("database error")
-
 	// ErrCountingUsers is the error returned when counting users.
 	ErrCountingUsers = errors.New("error when counting users")
 
@@ -24,12 +18,6 @@ var (
 
 	// ErrCreatingUser is the error returned when creating user.
 	ErrCreatingUser = errors.New("error when creating user")
-
-	// ErrDeletingUser is the error returned when deleting user.
-	ErrDeletingUser = errors.New("error when deleting user")
-
-	// ErrRestoringUser is the error returned when restoring user.
-	ErrRestoringUser = errors.New("error when restoring user")
 )
 
 // User is the interface that wraps the basic methods to interact with the user repository.

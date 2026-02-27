@@ -1,4 +1,4 @@
-package utils
+package auth
 
 import (
 	"crypto/x509"
@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
+
+	"go-clean-api/pkg/apperr"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -15,13 +17,13 @@ func LoadECDSAKeyFromFile(filename string, isPrivate bool) (any, error) {
 	// Read file
 	pemBytes, err := os.ReadFile(filename)
 	if err != nil {
-		return nil, NewAppErr(err, fmt.Sprintf("error when reading file: %s", filename), nil, nil)
+		return nil, apperr.NewAppErr(err, fmt.Sprintf("error when reading file: %s", filename), nil, nil)
 	}
 
 	// Decode PEM
 	block, _ := pem.Decode(pemBytes)
 	if block == nil {
-		return nil, NewAppErr(
+		return nil, apperr.NewAppErr(
 			errors.New("error when decoding .pem file"),
 			fmt.Sprintf("error when decoding %s file", filename),
 			nil,
@@ -37,7 +39,7 @@ func LoadECDSAKeyFromFile(filename string, isPrivate bool) (any, error) {
 		key, err = x509.ParsePKIXPublicKey(block.Bytes)
 	}
 	if err != nil {
-		return nil, NewAppErr(err, "error when parsing JWT key", nil, nil)
+		return nil, apperr.NewAppErr(err, "error when parsing JWT key", nil, nil)
 	}
 
 	return key, nil
@@ -53,7 +55,7 @@ func GetTokenAndKeyFromAlgo(algo, secret, keyPath string) (*jwt.Token, any, erro
 	switch algo {
 	case "HS512":
 		if len(secret) < 8 {
-			return nil, nil, NewAppErr(
+			return nil, nil, apperr.NewAppErr(
 				errors.New("secret must have at least 8 characters"),
 				"secret must have at least 8 characters",
 				nil,
@@ -69,10 +71,10 @@ func GetTokenAndKeyFromAlgo(algo, secret, keyPath string) (*jwt.Token, any, erro
 
 		key, err = LoadECDSAKeyFromFile(keyPath, true)
 		if err != nil {
-			return nil, nil, NewAppErr(err, "error when loading an ECDSA private or public key from a file", nil, nil)
+			return nil, nil, apperr.NewAppErr(err, "error when loading an ECDSA private or public key from a file", nil, nil)
 		}
 	default:
-		return nil, nil, NewAppErr(
+		return nil, nil, apperr.NewAppErr(
 			errors.New("unsupported JWT algo: must be HS512 or ES384"),
 			"unsupported JWT algo: must be HS512 or ES384",
 			nil,
@@ -94,10 +96,10 @@ func GetKeyFromAlgo(algo, secret, keyPath string) (any, error) {
 	case jwt.SigningMethodES384.Name:
 		key, err = LoadECDSAKeyFromFile(keyPath, false)
 		if err != nil {
-			return nil, NewAppErr(err, "error when loading an ECDSA private or public key from a file", nil, nil)
+			return nil, apperr.NewAppErr(err, "error when loading an ECDSA private or public key from a file", nil, nil)
 		}
 	default:
-		return nil, NewAppErr(
+		return nil, apperr.NewAppErr(
 			errors.New("unsupported JWT algo: must be HS512 or ES384"),
 			"unsupported JWT algo: must be HS512 or ES384",
 			nil,

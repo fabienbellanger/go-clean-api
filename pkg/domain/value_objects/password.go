@@ -1,7 +1,7 @@
 package values_objects
 
 import (
-	"go-clean-api/utils"
+	"go-clean-api/pkg/domain/validation"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -33,8 +33,8 @@ func NewPassword(value string) (Password, error) {
 }
 
 // Validate checks if a struct is valid and returns an array of errors
-func (p *Password) Validate() utils.ValidatorErrors {
-	return utils.ValidateVar(p.value, "password", "required,min=8")
+func (p *Password) Validate() validation.ValidatorErrors {
+	return validation.ValidateVar(p.value, "password", "required,min=8")
 }
 
 // HashUserPassword hashes a password

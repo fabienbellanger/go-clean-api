@@ -5,6 +5,7 @@ import (
 	"go-clean-api/pkg/adapters/db"
 	"go-clean-api/pkg/adapters/models"
 	"go-clean-api/pkg/domain/entities"
+	domainerr "go-clean-api/pkg/domain/errors"
 	"go-clean-api/pkg/domain/repositories"
 
 	"github.com/jmoiron/sqlx"
@@ -31,7 +32,7 @@ func (u *User) GetByEmail(req repositories.GetByEmailRequest) (repositories.GetB
 		req.Email.Value(),
 	)
 	if err := row.StructScan(&model); err != nil {
-		return repositories.GetByEmailResponse{}, fmt.Errorf("[user_sqlx_mysql:GetByEmail %w: %s]", repositories.ErrUserNotFound, err)
+		return repositories.GetByEmailResponse{}, fmt.Errorf("[user_sqlx_mysql:GetByEmail %w: %s]", domainerr.ErrNotFound, err)
 	}
 
 	response, err := model.Repository()
@@ -83,7 +84,7 @@ func (u *User) GetByID(req repositories.GetByIDRequest) (res repositories.GetByI
 		req.ID.String(),
 	)
 	if err = row.StructScan(&model); err != nil {
-		return repositories.GetByIDResponse{}, fmt.Errorf("[user_sqlx_mysql:GetByID %w: %s]", repositories.ErrUserNotFound, err)
+		return repositories.GetByIDResponse{}, fmt.Errorf("[user_sqlx_mysql:GetByID %w: %s]", domainerr.ErrNotFound, err)
 	}
 
 	user, err := model.Entity()
@@ -165,14 +166,14 @@ func (u *User) Delete(req repositories.DeleteRestoreRequest) (res repositories.D
 		req.ID.String(),
 	)
 	if err != nil {
-		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Delete %w: %s]", repositories.ErrDatabase, err)
+		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Delete %w: %s]", domainerr.ErrDatabase, err)
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Delete %w: %s]", repositories.ErrDatabase, err)
+		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Delete %w: %s]", domainerr.ErrDatabase, err)
 	}
 	if rowsAffected == 0 {
-		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Delete %w: %s]", repositories.ErrUserNotFound, err)
+		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Delete %w: %s]", domainerr.ErrNotFound, err)
 	}
 
 	return
@@ -187,15 +188,15 @@ func (u *User) Restore(req repositories.DeleteRestoreRequest) (res repositories.
 		req.ID.String(),
 	)
 	if err != nil {
-		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Restore %w: %s]", repositories.ErrDatabase, err)
+		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Restore %w: %s]", domainerr.ErrDatabase, err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Restore %w: %s]", repositories.ErrDatabase, err)
+		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Restore %w: %s]", domainerr.ErrDatabase, err)
 	}
 	if rowsAffected == 0 {
-		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Restore %w: %s]", repositories.ErrUserNotFound, err)
+		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Restore %w: %s]", domainerr.ErrNotFound, err)
 	}
 
 	return

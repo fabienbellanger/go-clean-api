@@ -3,16 +3,15 @@ package usecases
 import (
 	"errors"
 	"fmt"
-	"go-clean-api/pkg"
+	domainerr "go-clean-api/pkg/domain/errors"
 	"go-clean-api/pkg/domain/entities"
 	"go-clean-api/pkg/domain/repositories"
+	"go-clean-api/pkg/domain/services"
 	vo "go-clean-api/pkg/domain/value_objects"
 	"time"
 )
 
 var (
-	ErrDatabase            = errors.New("database error")
-	ErrUserNotFound        = errors.New("user not found")
 	ErrInvalidPassword     = errors.New("invalid password")
 	ErrHashPassword        = errors.New("error when hashing password")
 	ErrAccessTokenCreation = errors.New("error when creating access token")
@@ -30,13 +29,13 @@ type User interface {
 }
 
 type userUseCase struct {
-	jwtConfig      pkg.ConfigJWT
+	tokenGenerator services.TokenGenerator
 	userRepository repositories.User
 }
 
 // NewUser returns a new User use case
-func NewUser(userRepository repositories.User, jwtConfig pkg.ConfigJWT) User {
-	return &userUseCase{jwtConfig, userRepository}
+func NewUser(userRepository repositories.User, tokenGenerator services.TokenGenerator) User {
+	return &userUseCase{tokenGenerator, userRepository}
 }
 
 //
@@ -59,10 +58,10 @@ func (uc userUseCase) GetAccessToken(req GetAccessTokenRequest) (res GetAccessTo
 	// Get user ID and password from the email
 	userRepo, errRepo := uc.userRepository.GetByEmail(repositories.GetByEmailRequest{Email: req.Email})
 	if errRepo != nil {
-		if errors.Is(errRepo, repositories.ErrUserNotFound) {
-			err = fmt.Errorf("[user_uc:GetAccessToken %w: %s]", ErrUserNotFound, errRepo)
+		if errors.Is(errRepo, domainerr.ErrNotFound) {
+			err = fmt.Errorf("[user_uc:GetAccessToken %w: %s]", domainerr.ErrNotFound, errRepo)
 		} else {
-			err = fmt.Errorf("[user_uc:GetAccessToken %w: %s]", ErrDatabase, errRepo)
+			err = fmt.Errorf("[user_uc:GetAccessToken %w: %s]", domainerr.ErrDatabase, errRepo)
 		}
 		return
 	}
@@ -74,7 +73,7 @@ func (uc userUseCase) GetAccessToken(req GetAccessTokenRequest) (res GetAccessTo
 	}
 
 	// Generate a token
-	accessToken, errToken := entities.NewAccessToken(userRepo.ID, uc.jwtConfig)
+	accessToken, errToken := uc.tokenGenerator.Generate(userRepo.ID)
 	if errToken != nil {
 		err = fmt.Errorf("[user_uc:GetAccessToken %w: %s]", ErrAccessTokenCreation, errToken)
 		return
@@ -153,10 +152,10 @@ type GetUserByIDResponse struct {
 func (uc userUseCase) GetByID(req GetUserByIDRequest) (GetUserByIDResponse, error) {
 	res, err := uc.userRepository.GetByID(repositories.GetByIDRequest{ID: req.ID})
 	if err != nil {
-		if errors.Is(err, repositories.ErrUserNotFound) {
-			return GetUserByIDResponse{}, fmt.Errorf("[user_uc:GetByID %w: %s]", ErrUserNotFound, err)
+		if errors.Is(err, domainerr.ErrNotFound) {
+			return GetUserByIDResponse{}, fmt.Errorf("[user_uc:GetByID %w: %s]", domainerr.ErrNotFound, err)
 		}
-		return GetUserByIDResponse{}, fmt.Errorf("[user_uc:GetByID %w: %s]", ErrDatabase, err)
+		return GetUserByIDResponse{}, fmt.Errorf("[user_uc:GetByID %w: %s]", domainerr.ErrDatabase, err)
 	}
 
 	return GetUserByIDResponse{
@@ -185,7 +184,7 @@ func (uc userUseCase) GetAll(req GetAllUsersRequest) (res GetAllUsersResponse, e
 	// Get total users
 	resTotal, errTotal := uc.userRepository.CountAll(repositories.CountAllRequest{Deleted: req.Deleted})
 	if errTotal != nil {
-		err = fmt.Errorf("[user_uc:GetAll %w: %s]", ErrDatabase, errTotal)
+		err = fmt.Errorf("[user_uc:GetAll %w: %s]", domainerr.ErrDatabase, errTotal)
 		return
 	}
 	total := resTotal.Total
@@ -195,7 +194,7 @@ func (uc userUseCase) GetAll(req GetAllUsersRequest) (res GetAllUsersResponse, e
 		// Get users
 		resUsers, errUsers := uc.userRepository.GetAll(repositories.GetAllRequest{Pagination: req.Pagination, Deleted: req.Deleted})
 		if errUsers != nil {
-			err = fmt.Errorf("[user_uc:GetAll %w: %s]", ErrDatabase, errUsers)
+			err = fmt.Errorf("[user_uc:GetAll %w: %s]", domainerr.ErrDatabase, errUsers)
 			return
 		}
 
@@ -224,10 +223,10 @@ type DeleteRestoreUserResponse struct{}
 func (uc userUseCase) Delete(req DeleteRestoreUserRequest) (DeleteRestoreUserResponse, error) {
 	_, err := uc.userRepository.Delete(repositories.DeleteRestoreRequest{ID: req.ID})
 	if err != nil {
-		if errors.Is(err, repositories.ErrUserNotFound) {
-			return DeleteRestoreUserResponse{}, fmt.Errorf("[user_uc:Delete %w: %s]", ErrUserNotFound, err)
+		if errors.Is(err, domainerr.ErrNotFound) {
+			return DeleteRestoreUserResponse{}, fmt.Errorf("[user_uc:Delete %w: %s]", domainerr.ErrNotFound, err)
 		}
-		return DeleteRestoreUserResponse{}, fmt.Errorf("[user_uc:Delete %w: %s]", ErrDatabase, err)
+		return DeleteRestoreUserResponse{}, fmt.Errorf("[user_uc:Delete %w: %s]", domainerr.ErrDatabase, err)
 	}
 
 	return DeleteRestoreUserResponse{}, nil
@@ -237,10 +236,10 @@ func (uc userUseCase) Delete(req DeleteRestoreUserRequest) (DeleteRestoreUserRes
 func (uc userUseCase) Restore(req DeleteRestoreUserRequest) (DeleteRestoreUserResponse, error) {
 	_, err := uc.userRepository.Restore(repositories.DeleteRestoreRequest{ID: req.ID})
 	if err != nil {
-		if errors.Is(err, repositories.ErrUserNotFound) {
-			return DeleteRestoreUserResponse{}, fmt.Errorf("[user_uc:Restore %w: %s]", ErrUserNotFound, err)
+		if errors.Is(err, domainerr.ErrNotFound) {
+			return DeleteRestoreUserResponse{}, fmt.Errorf("[user_uc:Restore %w: %s]", domainerr.ErrNotFound, err)
 		}
-		return DeleteRestoreUserResponse{}, fmt.Errorf("[user_uc:Restore %w: %s]", ErrDatabase, err)
+		return DeleteRestoreUserResponse{}, fmt.Errorf("[user_uc:Restore %w: %s]", domainerr.ErrDatabase, err)
 	}
 
 	return DeleteRestoreUserResponse{}, nil

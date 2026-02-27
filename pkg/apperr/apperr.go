@@ -1,4 +1,4 @@
-package utils
+package apperr
 
 import "github.com/fabienbellanger/xerr"
 

@@ -1,10 +1,11 @@
-package entities
+package auth
 
 import (
 	"errors"
 	"go-clean-api/pkg"
+	"go-clean-api/pkg/apperr"
+	"go-clean-api/pkg/domain/entities"
 	vo "go-clean-api/pkg/domain/value_objects"
-	"go-clean-api/utils"
 	"testing"
 	"time"
 
@@ -13,14 +14,14 @@ import (
 
 func TestGenerateJWT(t *testing.T) {
 	type args struct {
-		userID   UserID
+		userID   entities.UserID
 		lifetime time.Duration
 		algo     string
 		secret   string
 	}
 
 	type result struct {
-		jwt AccessToken
+		jwt entities.AccessToken
 		err error
 	}
 
@@ -40,7 +41,7 @@ func TestGenerateJWT(t *testing.T) {
 				secret:   "my-secret",
 			},
 			wanted: result{
-				jwt: AccessToken{},
+				jwt: entities.AccessToken{},
 				err: errors.New("unsupported JWT algo: must be HS512 or ES384"),
 			},
 		},
@@ -53,7 +54,7 @@ func TestGenerateJWT(t *testing.T) {
 				secret:   "secret",
 			},
 			wanted: result{
-				jwt: AccessToken{},
+				jwt: entities.AccessToken{},
 				err: errors.New("secret must have at least 8 characters"),
 			},
 		},
@@ -66,7 +67,7 @@ func TestGenerateJWT(t *testing.T) {
 				secret:   "my-secret",
 			},
 			wanted: result{
-				jwt: AccessToken{},
+				jwt: entities.AccessToken{},
 				err: nil,
 			},
 		},
@@ -79,12 +80,10 @@ func TestGenerateJWT(t *testing.T) {
 				Lifetime:  tt.args.lifetime,
 				SecretKey: tt.args.secret,
 			}
-			jwt, err := NewAccessToken(
-				tt.args.userID,
-				cfg,
-			)
+			gen := NewJWTTokenGenerator(cfg)
+			jwt, err := gen.Generate(tt.args.userID)
 
-			appErr, ok := err.(*utils.AppErr)
+			appErr, ok := err.(*apperr.AppErr)
 			var got result
 			if !ok {
 				got = result{jwt, err}

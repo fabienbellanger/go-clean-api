@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"go-clean-api/internal/app"
 	"go-clean-api/pkg/infrastructure/chi_router"
 	"go-clean-api/pkg/infrastructure/logger"
 	"log"
@@ -41,7 +42,12 @@ func startServer() {
 	// Set the max number of CPUs
 	runtime.GOMAXPROCS(config.Server.MaxCPU)
 
-	server := chi_router.NewChiServer(*config, db, l)
+	deps, err := app.NewDependencies(*config, db, l)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	server := chi_router.NewChiServer(deps.Config, deps.Logger, deps.UserUseCase)
 	if err = server.Start(); err != nil {
 		log.Fatalln(err)
 	}

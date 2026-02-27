@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"go-clean-api/pkg/infrastructure/chi_router/handlers"
 	"go-clean-api/pkg/infrastructure/logger"
-	"go-clean-api/utils"
+	"go-clean-api/pkg/infrastructure/auth"
+	"go-clean-api/pkg/infrastructure/chi_router/httputil"
 	"net/http"
 	"time"
 
@@ -22,7 +23,7 @@ var tokenAuth *jwtauth.JWTAuth
 
 func (s *ChiServer) initJWTToken() error {
 	algo := s.Config.JWT.Algorithm
-	key, err := utils.GetKeyFromAlgo(algo, s.Config.JWT.SecretKey, s.Config.JWT.PublicKeyPath)
+	key, err := auth.GetKeyFromAlgo(algo, s.Config.JWT.SecretKey, s.Config.JWT.PublicKeyPath)
 	if err != nil {
 		return err
 	}
@@ -126,12 +127,12 @@ func (s *ChiServer) jwtAuthenticator(ja *jwtauth.JWTAuth) func(http.Handler) htt
 			token, _, err := jwtauth.FromContext(r.Context())
 
 			if err != nil {
-				utils.Err401(w, err, "Unauthorized", nil)
+				httputil.Err401(w, err, "Unauthorized", nil)
 				return
 			}
 
 			if token == nil || jwt.Validate(token, ja.ValidateOptions()...) != nil {
-				utils.Err401(w, nil, "Unauthorized", nil)
+				httputil.Err401(w, nil, "Unauthorized", nil)
 				return
 			}
 

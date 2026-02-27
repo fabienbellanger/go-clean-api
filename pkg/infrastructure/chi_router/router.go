@@ -3,15 +3,12 @@ package chi_router
 import (
 	"fmt"
 	"go-clean-api/pkg"
-	"go-clean-api/pkg/adapters/db"
-	"go-clean-api/pkg/adapters/repositories/gorm_mysql"
 	"go-clean-api/pkg/domain/usecases"
 	"go-clean-api/pkg/infrastructure/chi_router/handlers"
 	"go-clean-api/pkg/infrastructure/chi_router/handlers/api/user"
 	"go-clean-api/pkg/infrastructure/chi_router/handlers/web"
+	"go-clean-api/pkg/infrastructure/chi_router/httputil"
 	"go-clean-api/pkg/infrastructure/logger"
-	"go-clean-api/utils"
-	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -19,17 +16,17 @@ import (
 
 // ChiServer is a struct that represents a Chi server
 type ChiServer struct {
-	DB     db.DB
-	Logger logger.CustomLogger
-	Config pkg.Config
+	Logger      logger.CustomLogger
+	Config      pkg.Config
+	UserUseCase usecases.User
 }
 
 // NewChiServer creates a new ChiServer
-func NewChiServer(config pkg.Config, db db.DB, l logger.CustomLogger) ChiServer {
+func NewChiServer(config pkg.Config, l logger.CustomLogger, userUseCase usecases.User) ChiServer {
 	return ChiServer{
-		DB:     db,
-		Logger: l,
-		Config: config,
+		Logger:      l,
+		Config:      config,
+		UserUseCase: userUseCase,
 	}
 }
 
@@ -59,10 +56,10 @@ func (s *ChiServer) Setup() (*chi.Mux, error) {
 
 	// Routes
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
-		utils.Err404(w, nil, "Ressource not found", nil)
+		httputil.Err404(w, nil, "Ressource not found", nil)
 	})
 	r.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) {
-		utils.Err405(w, nil, "Method not allowed", nil)
+		httputil.Err405(w, nil, "Method not allowed", nil)
 	})
 	s.routes(r)
 
@@ -98,24 +95,11 @@ func (s *ChiServer) routes(r *chi.Mux) {
 
 		// Version 1
 		a.Route("/v1", func(v1 chi.Router) {
-			// User use case
-			// db, ok := s.DB.(*db.SqlxMySQL)
-			// if !ok {
-			// 	log.Fatalln("s.DB is not of type *db.SqlxMySQL")
-			// }
-			// userRepo := sqlx_mysql.NewUser(db)
-			db, ok := s.DB.(*db.GormMySQL)
-			if !ok {
-				log.Fatalln("s.DB is not of type *db.GormMySQL")
-			}
-			userRepo := gorm_mysql.NewUser(db)
-			userUseCase := usecases.NewUser(userRepo, s.Config.JWT)
-
 			// Public routes
 			v1.Group(func(v1 chi.Router) {
 				// User routes
 				v1.Route("/", func(u chi.Router) {
-					h := user.NewHandler(u, s.Logger, userUseCase)
+					h := user.NewHandler(u, s.Logger, s.UserUseCase)
 					h.PublicRoutes()
 				})
 			})
@@ -126,7 +110,7 @@ func (s *ChiServer) routes(r *chi.Mux) {
 
 				// User routes
 				v1.Route("/users", func(u chi.Router) {
-					h := user.NewHandler(u, s.Logger, userUseCase)
+					h := user.NewHandler(u, s.Logger, s.UserUseCase)
 					h.PrivateRoutes()
 				})
 			})

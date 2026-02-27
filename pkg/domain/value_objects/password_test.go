@@ -4,7 +4,7 @@ import (
 	"log"
 	"testing"
 
-	"go-clean-api/utils"
+	"go-clean-api/pkg/domain/validation"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -15,14 +15,14 @@ func TestNewPassword(t *testing.T) {
 		err      error
 	}
 
-	var e1 utils.ValidatorErrors
-	e1 = append(e1, utils.ValidatorError{
+	var e1 validation.ValidatorErrors
+	e1 = append(e1, validation.ValidatorError{
 		Field: "password",
 		Tag:   "min",
 		Value: "8",
 	})
-	var e2 utils.ValidatorErrors
-	e2 = append(e2, utils.ValidatorError{
+	var e2 validation.ValidatorErrors
+	e2 = append(e2, validation.ValidatorError{
 		Field: "password",
 		Tag:   "required",
 		Value: "",

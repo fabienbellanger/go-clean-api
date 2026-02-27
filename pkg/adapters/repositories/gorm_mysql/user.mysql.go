@@ -5,6 +5,7 @@ import (
 	"go-clean-api/pkg/adapters/db"
 	"go-clean-api/pkg/adapters/models"
 	"go-clean-api/pkg/domain/entities"
+	domainerr "go-clean-api/pkg/domain/errors"
 	"go-clean-api/pkg/domain/repositories"
 
 	"gorm.io/gorm"
@@ -29,9 +30,9 @@ func (u *User) GetByEmail(req repositories.GetByEmailRequest) (res repositories.
 			AND deleted_at IS NULL
 		LIMIT 1`, req.Email.Value()).Scan(&model)
 	if result.Error != nil {
-		return res, fmt.Errorf("[user_gorm_mysql:GetByEmail %w: %s]", repositories.ErrUserNotFound, result.Error)
+		return res, fmt.Errorf("[user_gorm_mysql:GetByEmail %w: %s]", domainerr.ErrNotFound, result.Error)
 	} else if result.RowsAffected == 0 {
-		return res, fmt.Errorf("[user_gorm_mysql:GetByEmail %w]", repositories.ErrUserNotFound)
+		return res, fmt.Errorf("[user_gorm_mysql:GetByEmail %w]", domainerr.ErrNotFound)
 	}
 
 	res, err = model.Repository()
@@ -51,7 +52,7 @@ func (u *User) GetByID(req repositories.GetByIDRequest) (res repositories.GetByI
 		WHERE id = ?
 			AND deleted_at IS NULL
 		LIMIT 1`, req.ID.Value()).Scan(&model); result.Error != nil {
-		return res, fmt.Errorf("[user_gorm_mysql:GetByID %w: %s]", repositories.ErrUserNotFound, result.Error)
+		return res, fmt.Errorf("[user_gorm_mysql:GetByID %w: %s]", domainerr.ErrNotFound, result.Error)
 	}
 	user, err := model.Entity()
 
@@ -148,11 +149,11 @@ func (u *User) Delete(req repositories.DeleteRestoreRequest) (res repositories.D
 		req.ID.String(),
 	)
 	if result.Error != nil {
-		return res, fmt.Errorf("[user_sqlx_mysql:Delete %w: %s]", repositories.ErrDatabase, result.Error)
+		return res, fmt.Errorf("[user_gorm_mysql:Delete %w: %s]", domainerr.ErrDatabase, result.Error)
 	}
 
 	if result.RowsAffected == 0 {
-		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Delete %w]", repositories.ErrUserNotFound)
+		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_gorm_mysql:Delete %w]", domainerr.ErrNotFound)
 	}
 
 	return
@@ -167,11 +168,11 @@ func (u *User) Restore(req repositories.DeleteRestoreRequest) (res repositories.
 		req.ID.String(),
 	)
 	if result.Error != nil {
-		return res, fmt.Errorf("[user_sqlx_mysql:Restore %w: %s]", repositories.ErrDatabase, result.Error)
+		return res, fmt.Errorf("[user_gorm_mysql:Restore %w: %s]", domainerr.ErrDatabase, result.Error)
 	}
 
 	if result.RowsAffected == 0 {
-		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_sqlx_mysql:Restore %w]", repositories.ErrUserNotFound)
+		return repositories.DeleteRestoreResponse{}, fmt.Errorf("[user_gorm_mysql:Restore %w]", domainerr.ErrNotFound)
 	}
 
 	return
