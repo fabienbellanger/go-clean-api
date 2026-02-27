@@ -21,10 +21,7 @@ type Pagination struct {
 
 // NewPagination creates a new Pagination
 func NewPagination(page, size, maxSize int) Pagination {
-	p := page
-	if page < 1 {
-		p = 1
-	}
+	p := max(page, 1)
 
 	m := maxSize
 	if maxSize == 0 || maxSize > PaginationMaxSize {

@@ -39,7 +39,7 @@ func BigTasks(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	var tasks []Task
-	for i := 0; i < 10_000; i++ {
+	for i := range 10_000 {
 		tasks = append(tasks, Task{
 			ID:   i*100_000 + 1,
 			Name: fmt.Sprintf("My task with ID: %d", i),

@@ -46,8 +46,8 @@ func orderValues(list string, prefixes ...string) []string {
 		prefix = prefixes[0] + "."
 	}
 
-	sorts := strings.Split(list, ",")
-	for _, s := range sorts {
+	sorts := strings.SplitSeq(list, ",")
+	for s := range sorts {
 		if len(s) > 0 {
 			key := fmt.Sprintf("%s%s", prefix, s[1:])
 			if strings.HasPrefix(s, "+") && len(s[1:]) > 1 {

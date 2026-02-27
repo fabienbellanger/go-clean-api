@@ -4,6 +4,7 @@
 	update-all \
 	format \
 	lint \
+	fix \
 	serve \
 	serve-race \
 	serve-logs \
@@ -77,6 +78,10 @@ format:
 lint: format
 	$(GO_VET) ./...
 
+## fix: Run go fix
+fix:
+	$(GO_CMD) fix ./...
+
 ## serve: Serve API
 serve:
 	$(GO_RUN) $(MAIN_PATH) run
@@ -128,10 +133,10 @@ test-beautify:
 test-tparse:
 	go test -cover -json ./... | tparse -trimpath -all
 
-test-cover-count: 
+test-cover-count:
 	$(GO_TEST) -covermode=count -coverprofile=cover-count.out ./...
 
-test-cover-atomic: 
+test-cover-atomic:
 	$(GO_TEST) -covermode=atomic -coverprofile=cover-atomic.out ./...
 
 cover-count:
@@ -156,11 +161,11 @@ view-cover-atomic: test-cover-atomic html-cover-atomic
 	rm cover-atomic.out
 
 ## bench: Run benchmarks
-bench: 
+bench:
 	$(GO_TEST) -benchmem -bench=. ./...
 
 ## clean: Clean files
-clean: 
+clean:
 	$(GO_CLEAN)
 	rm -f $(BINARY_NAME)
 	rm -f $(BINARY_UNIX)
